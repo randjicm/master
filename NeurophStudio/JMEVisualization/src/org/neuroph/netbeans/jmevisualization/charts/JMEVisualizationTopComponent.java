@@ -1,18 +1,48 @@
 package org.neuroph.netbeans.jmevisualization.charts;
 
 import java.awt.FlowLayout;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
 import org.netbeans.api.settings.ConvertAsProperties;
+import org.neuroph.core.NeuralNetwork;
 import org.neuroph.core.data.DataSet;
+import org.neuroph.core.events.LearningEvent;
+import org.neuroph.core.events.LearningEventListener;
 import org.neuroph.netbeans.jmevisualization.JMEVisualization;
 import org.neuroph.netbeans.jmevisualization.charts.graphs.JMEDatasetHistogram3D;
 import org.neuroph.netbeans.jmevisualization.charts.graphs.JMEDatasetScatter3D;
+import org.neuroph.netbeans.jmevisualization.charts.graphs.JMEWeightsHistogram3D;
+import org.neuroph.netbeans.jmevisualization.concurrent.Consumer;
+import org.neuroph.netbeans.jmevisualization.concurrent.Producer;
+import org.neuroph.netbeans.jmevisualization.concurrent.ProducerConsumer;
+import org.neuroph.netbeans.jmevisualization.concurrent.weights.NeuralNetworkWeightsConsumer;
+import org.neuroph.netbeans.jmevisualization.concurrent.weights.NeuralNetworkWeightsProducer;
+import org.neuroph.netbeans.visual.NeuralNetAndDataSet;
+import org.neuroph.netbeans.visual.TrainingController;
+import org.neuroph.nnet.learning.LMS;
+import org.neuroph.nnet.learning.MomentumBackpropagation;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
-import org.openide.windows.TopComponent;
+import org.openide.loaders.DataObject;
+import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.lookup.AbstractLookup;
+import org.openide.util.lookup.InstanceContent;
+import org.openide.util.lookup.ProxyLookup;
+import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
 /**
@@ -36,16 +66,38 @@ import org.openide.windows.WindowManager;
     "CTL_JMEVisualizationTopComponent=JMEVisualization Window",
     "HINT_JMEVisualizationTopComponent=This is a JMEVisualization window"
 })
-public final class JMEVisualizationTopComponent extends TopComponent {
+public final class JMEVisualizationTopComponent extends TopComponent implements LearningEventListener{
     
     private static JMEVisualizationTopComponent instance;
     private static final String PREFERRED_ID = "JMEVisualizationTopComponent";
-
-    public JMEVisualizationTopComponent() {
+    private InstanceContent content;
+    private AbstractLookup aLookup;
+    private DropTargetListener dtListener;
+    private DropTarget dropTarget;
+    private int acceptableActions = DnDConstants.ACTION_COPY;
+    private NeuralNetwork neuralNetwork;
+    private DataSet trainingSet;
+    private NeuralNetAndDataSet neuralNetAndDataSet;
+    private TrainingController trainingController;
+    private Thread firstCalculation = null;
+    private int iterationCounter = 0;
+    private ArrayList<Double[]> neuralNetworkInputs;
+    private ArrayList<Double> setValues;
+    private ProducerConsumer producerConsumer;
+    private boolean trainingPermission = false;
+    
+    private JMEVisualizationTopComponent() {
         initComponents();
         setName(Bundle.CTL_JMEVisualizationTopComponent());
         setToolTipText(Bundle.HINT_JMEVisualizationTopComponent());
-
+        content = new InstanceContent();
+        aLookup = new AbstractLookup(content);
+        this.dtListener = new DTListener();
+        this.dropTarget = new DropTarget(
+                this,
+                this.acceptableActions,
+                this.dtListener,
+                true);
     }
     
     /**
@@ -80,7 +132,34 @@ public final class JMEVisualizationTopComponent extends TopComponent {
                 + "' ID. That is a potential source of errors and unexpected behavior.");
         return getDefault();
     }
+    
+    @Override
+    public Lookup getLookup() {
+        return new ProxyLookup(new Lookup[]{
+            super.getLookup(),
+            aLookup
+        });
+    }
+    
+    @Override
+    public void handleLearningEvent(LearningEvent le) {
+        
+        iterationCounter++;
 
+        if (iterationCounter % 10 == 0) {
+            
+            java.awt.EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    producerConsumer.startThreading();
+                    jmeCanvas.requestFocus();//request focus to force repaint
+                }
+            });
+
+        }
+
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -208,7 +287,7 @@ public final class JMEVisualizationTopComponent extends TopComponent {
     public void componentOpened() {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
-            public void run() {
+            public void run() {            
                 jmeVisualization = new JMEVisualization();
                 jmeVisualization.setWidth(getVisualizationPanel().getWidth()-15);
                 jmeVisualization.setHeight(getVisualizationPanel().getHeight()-30);
@@ -229,6 +308,7 @@ public final class JMEVisualizationTopComponent extends TopComponent {
 
     @Override
     public void componentClosed() {
+        trainingPermission = false;
         jmeVisualization.stop();
         getVisualizationPanel().remove(jmeCanvas); // proveri da li ovo radi ocekivano!!!!        
         getVisualizationPanel().revalidate();
@@ -250,22 +330,18 @@ public final class JMEVisualizationTopComponent extends TopComponent {
         return visualizationPanel;
     }
 
-    public void drawSampleDataset() {
-      JMEDatasetScatter3D jmeDataSetScatter = new JMEDatasetScatter3D(createSphereDataSet(), jmeVisualization);           
-      jmeDataSetScatter.createGraph();
+    public void drawWeightsHistogram(NeuralNetwork neuralNetwork) {
+      JMEWeightsHistogram3D jmeWeightsHistogram3D = new JMEWeightsHistogram3D(neuralNetwork, jmeVisualization);           
+      jmeWeightsHistogram3D.createGraph();
     }
     
-    public void drawSampleHistogram() {
-      JMEDatasetHistogram3D jmeDataSetHistogram = new JMEDatasetHistogram3D(createSphereDataSet(), jmeVisualization);           
-      jmeDataSetHistogram.createGraph();
-    }
     
     // created demo dataset
     public DataSet createSphereDataSet() {
 
         DataSet d = new DataSet(3, 1);
         Random r = new Random();
-        for (int i = 1; i <= 5000; i++) {
+        for (int i = 1; i <= 8000; i++) {
 
             double x = Math.round(r.nextGaussian() * 100);
             double y = Math.round(r.nextGaussian() * 100);
@@ -282,8 +358,115 @@ public final class JMEVisualizationTopComponent extends TopComponent {
         return d;
     }    
     
+    public void drawSampleHistogram() {
+      JMEDatasetHistogram3D jmeDataSetHistogram = new JMEDatasetHistogram3D(createSphereDataSet(), jmeVisualization);           
+      jmeDataSetHistogram.createGraph();
+    }
+    
+    public void drawSampleDataset() {
+        JMEDatasetScatter3D jmeDataSetScatter = new JMEDatasetScatter3D(createSphereDataSet(), jmeVisualization);
+        jmeDataSetScatter.createGraph();
+    }
+    
     private double getCategoryMembership(double randomX, double randomY, double randomZ, double x, double y, double z, double a, double b, double c) {
         return (randomX - x) * (randomX - x) / (a * a) + (randomY - y) * (randomY - y) / (b * b) + (randomZ - z) * (randomZ - z) / (c * c);
     } 
+
+    class DTListener implements DropTargetListener {
+
+        @Override
+        public void dragEnter(DropTargetDragEvent dtde) {
+            dtde.acceptDrag(dtde.getDropAction());
+        }
+
+        @Override
+        public void dragExit(DropTargetEvent dte) {
+        }
+
+        @Override
+        public void dragOver(DropTargetDragEvent dtde) {
+            dtde.acceptDrag(dtde.getDropAction());
+        }
+
+        @Override
+        public void dropActionChanged(DropTargetDragEvent dtde) {
+            dtde.acceptDrag(dtde.getDropAction());
+        }
+
+        @Override
+        public void drop(DropTargetDropEvent e) {
+            try {
+                
+                Transferable t = e.getTransferable();
+                DataFlavor dataFlavor = t.getTransferDataFlavors()[1];                              
+                DataObject dataObject = (DataObject) t.getTransferData(dataFlavor);
+                
+                DataSet dataSet = dataObject.getLookup().lookup(DataSet.class);//get the object from lookup listener
+                NeuralNetwork nnet = dataObject.getLookup().lookup(NeuralNetwork.class);//get the object from lookup listener
+                        
+                if (dataSet != null) {
+                    trainingSet = dataSet;
+                }
+
+                if (nnet != null) {
+                    neuralNetwork = nnet;
+                }
+
+                if(neuralNetwork != null && trainingSet != null){
+                    
+                    trainingPermission = true;
+                    removeContent();
+                    trainingPreprocessing();
+                    
+                    addContent();
+                    
+                    Producer producer = new NeuralNetworkWeightsProducer(neuralNetAndDataSet);
+                    Consumer consumer = new NeuralNetworkWeightsConsumer(jmeVisualization);
+                    
+                    producerConsumer = new ProducerConsumer(1000, producer, consumer);
+                    
+                    JMEVisualizationTopComponent.this.requestActive();
+                    
+                }
+                
+                e.dropComplete(true);
+            } catch (UnsupportedFlavorException ex) {
+                Exceptions.printStackTrace(ex);
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+    }
     
+    /*
+     * Collects all the information needed for training neural network
+     */
+    public void trainingPreprocessing() {
+        neuralNetAndDataSet = new NeuralNetAndDataSet(neuralNetwork, trainingSet);
+        trainingController = new TrainingController(neuralNetAndDataSet);
+        neuralNetwork.getLearningRule().addListener(this);//adds learning rule to observer
+        trainingController.setLmsParams(0.7, 0.01, 0);
+        LMS learningRule = (LMS) this.neuralNetAndDataSet.getNetwork().getLearningRule();
+        if (learningRule instanceof MomentumBackpropagation) {
+            ((MomentumBackpropagation) learningRule).setMomentum(0.2);
+        }
+    }
+    
+    public void removeContent() {
+        try {
+            content.remove(neuralNetAndDataSet);
+            content.remove(trainingController);
+            JMEVisualizationTopComponent.this.requestActive();
+        } catch (Exception ex) {
+        }
+        
+    }
+    
+    public void addContent(){
+        
+        content.add(neuralNetAndDataSet);
+        content.add(trainingController);
+        JMEVisualizationTopComponent.this.requestActive();
+        
+    }    
 }

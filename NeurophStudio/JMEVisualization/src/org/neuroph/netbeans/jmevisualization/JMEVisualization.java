@@ -6,17 +6,12 @@ package org.neuroph.netbeans.jmevisualization;
 
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.scene.Geometry;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import javax.swing.JPanel;
-import org.neuroph.core.NeuralNetwork;
-import org.neuroph.core.data.DataSet;
-import org.neuroph.netbeans.jmevisualization.charts.JMEVisualizationTopComponent;
 
 /**
  * JME based Visualization Component
@@ -35,10 +30,10 @@ public class JMEVisualization extends SimpleApplication {
     
     @Override
     public void simpleInitApp() {   
-        
+        rootNode.rotate(1.57f, 0, 3.14f);
         flyCam.setDragToRotate(true);
         flyCam.setEnabled(true);
-        flyCam.setMoveSpeed(50);
+        flyCam.setMoveSpeed(80);
         flyCam.setZoomSpeed(10);     
         
         CoordinateSystem coordinateSys = new CoordinateSystem(1);
@@ -50,8 +45,6 @@ public class JMEVisualization extends SimpleApplication {
     
     private JmeCanvasContext jmeCanvasContext;
 
- 
- 
     public JmeCanvasContext getJmeCanvasContext() {
         return jmeCanvasContext;
     }
@@ -59,14 +52,6 @@ public class JMEVisualization extends SimpleApplication {
     public void setJmeCanvasContext(JmeCanvasContext jmeCanvasContext) {
         this.jmeCanvasContext = jmeCanvasContext;
     }
-    
-//    private static JMEVisualization instance;
-//    
-//    public static JMEVisualization getInstance() {
-//        if (instance==null)
-//            instance = new JMEVisualization();
-//        return instance;
-//    }
            
     // ovde se na top component stavlja jme canvas koji crta grafike
     public void startApplication() {
