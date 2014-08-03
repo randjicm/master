@@ -34,40 +34,23 @@ public class JMEVisualization extends SimpleApplication {
     private int height;
     private static JPanel visualizationPanel;
     private ScheduledThreadPoolExecutor executor;
-
-    public JMEVisualization() {
-        //rootNode.addControl(new UpdateControl());
-        
-        /* This constructor creates a new executor with a core pool size of n. */
-        //executor = new ScheduledThreadPoolExecutor(10);
-        //System.out.println("Queue size: " + executor.getQueue().remainingCapacity());
-        
-    }
     
     @Override
     public void simpleInitApp() {
-                             
+        rootNode.addControl(new UpdateControl());                     
         rootNode.rotate(1.57f, 0, 3.14f);
         flyCam.setDragToRotate(true);
         flyCam.setEnabled(true);
         flyCam.setMoveSpeed(80);
         flyCam.setZoomSpeed(10);     
         
-        CoordinateSystem coordinateSys = new CoordinateSystem(1);
-        Geometry coordinateSystem = coordinateSys.generatePlanes(10);
-        coordinateSystem.setMaterial(new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md"));
-        rootNode.attachChild(coordinateSystem); // rootNode from  SimpleApplication
+//        CoordinateSystem coordinateSys = new CoordinateSystem(1);
+//        Geometry coordinateSystem = coordinateSys.generatePlanes(10);
+//        coordinateSystem.setMaterial(new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md"));
+//        rootNode.attachChild(coordinateSystem); // rootNode from  SimpleApplication
         
     }
-    
-//    @Override
-//    public void destroy() {
-//        super.destroy();
-//        if (executor != null) {
-//            executor.shutdown();
-//        }
-//    }
-    
+        
     private JmeCanvasContext jmeCanvasContext;
 
     public JmeCanvasContext getJmeCanvasContext() {
@@ -94,18 +77,18 @@ public class JMEVisualization extends SimpleApplication {
         this.startCanvas();
     }
     
-    public void addGeometry(final Geometry geometry) {
-        
-        
-        rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
-                
-                @Override
-                public Geometry call() throws Exception {
-                    rootNode.attachChild(geometry.clone());
-                    return null;
-                }
-            });   
-    }
+//    public void addGeometry(final Geometry geometry) {
+//        
+//        
+//        rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
+//                
+//                @Override
+//                public Geometry call() throws Exception {
+//                    rootNode.attachChild(geometry.clone());
+//                    return null;
+//                }
+//            });   
+//    }
     
    
     public int getWidth() {
