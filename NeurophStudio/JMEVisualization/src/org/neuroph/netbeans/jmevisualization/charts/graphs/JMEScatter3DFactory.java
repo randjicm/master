@@ -51,8 +51,8 @@ public class JMEScatter3DFactory implements Scatter3DFactory<Void, Point3D.Float
              m.setColor("Color",  ColorRGBA.Red);
             sphereGeometry.setMaterial(m);
             sphereGeometry.move(data[i]);
-          //  rootNode.attachChild(sphereGeometry);
-            jmeVisualization.addGeometry(sphereGeometry);
+
+            //jmeVisualization.addGeometry(sphereGeometry);
         }        
                          
         return null;

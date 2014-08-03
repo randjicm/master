@@ -15,8 +15,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class ProducerConsumer {
 
     private final BlockingQueue sharedQueue;
-    private final Producer producer;
-    private final Consumer consumer;
+    private  Producer producer;
+    private  Consumer consumer;
 
     public ProducerConsumer(Producer producer, Consumer consumer) {
         sharedQueue = new LinkedBlockingQueue();
@@ -34,14 +34,40 @@ public class ProducerConsumer {
         this.consumer.setSharedQueue(sharedQueue);
     }
 
-    public void startThreading() {
+    public ProducerConsumer() {
+        sharedQueue = new LinkedBlockingQueue();
+        
+    }
+    
+     public ProducerConsumer(int queueCapacity) {
+        sharedQueue = new LinkedBlockingQueue(queueCapacity);        
+    }
+    
+   
+    public void startProducing(){
+        new Thread(producer).start();
+    }
+    
+    public void startConsuming(){
+        new Thread(consumer).start();
+    }
 
-        Thread producerThread = new Thread(producer);
-        Thread consumerThread = new Thread(consumer);
+    public Producer getProducer() {
+        return producer;
+    }
 
-        producerThread.start();
-        consumerThread.start();
+    public void setProducer(Producer producer) {
+        this.producer = producer;
+        this.producer.setSharedQueue(sharedQueue);
+    }
 
+    public Consumer getConsumer() {
+        return consumer;
+    }
+
+    public void setConsumer(Consumer consumer) {
+        this.consumer = consumer;
+        this.consumer.setSharedQueue(sharedQueue);
     }
 
 }

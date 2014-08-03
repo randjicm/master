@@ -1,5 +1,6 @@
 package org.neuroph.netbeans.jmevisualization.charts;
 
+import com.jme3.gde.core.sceneviewer.SceneViewerTopComponent;
 import java.awt.FlowLayout;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -66,7 +67,7 @@ import org.openide.windows.WindowManager;
     "CTL_JMEVisualizationTopComponent=JMEVisualization Window",
     "HINT_JMEVisualizationTopComponent=This is a JMEVisualization window"
 })
-public final class JMEVisualizationTopComponent extends TopComponent implements LearningEventListener{
+public final class JMEVisualizationTopComponent extends SceneViewerTopComponent implements LearningEventListener{
     
     private static JMEVisualizationTopComponent instance;
     private static final String PREFERRED_ID = "JMEVisualizationTopComponent";
@@ -81,10 +82,9 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     private TrainingController trainingController;
     private Thread firstCalculation = null;
     private int iterationCounter = 0;
-    private ArrayList<Double[]> neuralNetworkInputs;
-    private ArrayList<Double> setValues;
     private ProducerConsumer producerConsumer;
-    private boolean trainingPermission = false;
+    private java.awt.Canvas jmeCanvas;
+    private JMEVisualization jmeVisualization;
     
     private JMEVisualizationTopComponent() {
         initComponents();
@@ -105,6 +105,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
      * only, i.e. deserialization routines; otherwise you could get a
      * non-deserialized instance. To obtain the singleton instance, use
      * {@link #findInstance}.
+     * @return 
      */
     public static synchronized JMEVisualizationTopComponent getDefault() {
         if (instance == null) {
@@ -116,6 +117,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     /**
      * Obtain the MultiLayerPerceptronClassificationSampleTopComponent instance.
      * Never call {@link #getDefault} directly!
+     * @return 
      */
     public static synchronized JMEVisualizationTopComponent findInstance() {
         TopComponent win = WindowManager.getDefault().findTopComponent(PREFERRED_ID);
@@ -144,20 +146,17 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     @Override
     public void handleLearningEvent(LearningEvent le) {
         
-        iterationCounter++;
-
-        if (iterationCounter % 10 == 0) {
+        if (iterationCounter == 0) {
             
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    producerConsumer.startThreading();
-                    jmeCanvas.requestFocus();//request focus to force repaint
-                }
-            });
-
+            producerConsumer.startConsuming();
+        }      
+        
+        iterationCounter++;
+        
+        if (iterationCounter % 10 == 0) {
+            producerConsumer.startProducing();
         }
-
+        
     }
     
     /**
@@ -270,7 +269,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
             @Override
             public void run() {
                 drawSampleDataset();
-                jmeCanvas.requestFocus(); // request focus to force repaint
+                getJmeCanvas().requestFocus(); // request focus to force repaint
             }
         });          
          
@@ -283,32 +282,31 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel visualizationPanel;
     // End of variables declaration//GEN-END:variables
+    
     @Override
     public void componentOpened() {
+
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
-            public void run() {            
+            public void run() {
+                
                 jmeVisualization = new JMEVisualization();
-                jmeVisualization.setWidth(getVisualizationPanel().getWidth()-15);
-                jmeVisualization.setHeight(getVisualizationPanel().getHeight()-30);
-
+                jmeVisualization.setWidth(getVisualizationPanel().getWidth() - 15);
+                jmeVisualization.setHeight(getVisualizationPanel().getHeight() - 30);
                 jmeVisualization.startApplication();
+                
                 jmeCanvas = jmeVisualization.getJmeCanvasContext().getCanvas();
                 
                 getVisualizationPanel().setLayout(new FlowLayout());
                 getVisualizationPanel().add(jmeCanvas);
                 getVisualizationPanel().revalidate();
+                
             }
-        });    
-
+        });      
     }
     
-    java.awt.Canvas jmeCanvas;
-    JMEVisualization jmeVisualization;
-
     @Override
     public void componentClosed() {
-        trainingPermission = false;
         jmeVisualization.stop();
         getVisualizationPanel().remove(jmeCanvas); // proveri da li ovo radi ocekivano!!!!        
         getVisualizationPanel().revalidate();
@@ -372,6 +370,14 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         return (randomX - x) * (randomX - x) / (a * a) + (randomY - y) * (randomY - y) / (b * b) + (randomZ - z) * (randomZ - z) / (c * c);
     } 
 
+    public java.awt.Canvas getJmeCanvas() {
+        return jmeCanvas;
+    }
+
+    public void setJmeCanvas(java.awt.Canvas jmeCanvas) {
+        this.jmeCanvas = jmeCanvas;
+    }
+
     class DTListener implements DropTargetListener {
 
         @Override
@@ -413,19 +419,17 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 }
 
                 if(neuralNetwork != null && trainingSet != null){
-                    
-                    trainingPermission = true;
+
                     removeContent();
                     trainingPreprocessing();
                     
                     addContent();
                     
-                    Producer producer = new NeuralNetworkWeightsProducer(neuralNetAndDataSet);
-                    Consumer consumer = new NeuralNetworkWeightsConsumer(jmeVisualization);
+                    producerConsumer = new ProducerConsumer(1000);
+                    producerConsumer.setConsumer(new NeuralNetworkWeightsConsumer(jmeVisualization));
+                    producerConsumer.setProducer(new NeuralNetworkWeightsProducer(neuralNetAndDataSet));
                     
-                    producerConsumer = new ProducerConsumer(1000, producer, consumer);
-                    
-                    JMEVisualizationTopComponent.this.requestActive();
+//                    JMEVisualizationTopComponent.this.requestActive();
                     
                 }
                 

@@ -8,8 +8,10 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.control.UpdateControl;
 import com.jme3.scene.shape.Cylinder;
 import java.beans.Beans;
+import java.util.concurrent.Callable;
 import org.neuroph.netbeans.jmevisualization.JMEVisualization;
 import org.nugs.graph3d.api.Histogram3DFactory;
 import org.nugs.graph3d.api.Histogram3DProperties;
@@ -27,12 +29,35 @@ public class JMEHistogram3DFactory implements Histogram3DFactory<Void, Point3D.F
         this.jmeVisualization = jmeVisualization;        
     }
     
+    private void attachChild(final Geometry geometry) {
+        jmeVisualization.getRootNode().addControl(new UpdateControl());
+        jmeVisualization.getRootNode().getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
+
+            @Override
+            public Geometry call() throws Exception {
+                jmeVisualization.getRootNode().attachChild(geometry.clone());
+                return null;
+            }
+        });
+    }
+    
+    public void detachAllChildren() {
+        jmeVisualization.getRootNode().addControl(new UpdateControl());
+        jmeVisualization.getRootNode().getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
+
+            @Override
+            public Geometry call() throws Exception {
+                jmeVisualization.getRootNode().detachAllChildren();
+                return null;
+            }
+        });
+    }
     // pozovi ovo iz neke akcije da iscrtaj dataset
     @Override
     public Void createHistogram3D(Point3D.Float[] points, Histogram3DProperties prop) {
-        
-        Beans.setDesignTime(false);       
-        Vector3f[] data = new Vector3f[points.length];   
+
+        Beans.setDesignTime(false);
+        Vector3f[] data = new Vector3f[points.length];
         float maxZ = 0;
         for (int i = 1; i < points.length; i++) {
             data[i] = new Vector3f(points[i].getX(), points[i].getY(), points[i].getZ());
@@ -40,11 +65,14 @@ public class JMEHistogram3DFactory implements Histogram3DFactory<Void, Point3D.F
                 maxZ = data[i].getZ();
             }
         }
-                          
+
+//        jmeVisualization.getRootNode().detachAllChildren();
+        detachAllChildren();
+
         for (int i = 1; i < points.length; i++) {
             //x-layers count, y-connections count, z-weight value
 
-            Geometry cylinderGeometry = new Geometry("cylinder " + i, new Cylinder(32, 32, 2f, data[i].z * 100 / maxZ, true));
+            final Geometry cylinderGeometry = new Geometry("cylinder " + i, new Cylinder(32, 32, 2f, data[i].z * 100 / maxZ, true));
             Material m = new Material(jmeVisualization.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
             if (data[i].z >= 0) {
                 m.setColor("Color", ColorRGBA.Red);
@@ -53,7 +81,8 @@ public class JMEHistogram3DFactory implements Histogram3DFactory<Void, Point3D.F
             }
             cylinderGeometry.setMaterial(m);
             cylinderGeometry.move(data[i].x * 20, data[i].y * 5, data[i].z * 50 / maxZ);//data[i].z * 5
-            jmeVisualization.addGeometry(cylinderGeometry);
+            
+            attachChild(cylinderGeometry);
 
         }
         //jmeVisualization.getRootNode().rotate(1.57f, 0, 3.14f);//1.57

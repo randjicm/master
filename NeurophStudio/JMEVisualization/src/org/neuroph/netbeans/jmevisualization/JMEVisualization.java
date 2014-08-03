@@ -7,11 +7,20 @@ package org.neuroph.netbeans.jmevisualization;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.control.UpdateControl;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import javax.swing.JPanel;
+import org.openide.util.Exceptions;
 
 /**
  * JME based Visualization Component
@@ -24,12 +33,20 @@ public class JMEVisualization extends SimpleApplication {
     private int width;
     private int height;
     private static JPanel visualizationPanel;
-    
-    
-    
+    private ScheduledThreadPoolExecutor executor;
+
+    public JMEVisualization() {
+        //rootNode.addControl(new UpdateControl());
+        
+        /* This constructor creates a new executor with a core pool size of n. */
+        //executor = new ScheduledThreadPoolExecutor(10);
+        //System.out.println("Queue size: " + executor.getQueue().remainingCapacity());
+        
+    }
     
     @Override
-    public void simpleInitApp() {   
+    public void simpleInitApp() {
+                             
         rootNode.rotate(1.57f, 0, 3.14f);
         flyCam.setDragToRotate(true);
         flyCam.setEnabled(true);
@@ -42,6 +59,14 @@ public class JMEVisualization extends SimpleApplication {
         rootNode.attachChild(coordinateSystem); // rootNode from  SimpleApplication
         
     }
+    
+//    @Override
+//    public void destroy() {
+//        super.destroy();
+//        if (executor != null) {
+//            executor.shutdown();
+//        }
+//    }
     
     private JmeCanvasContext jmeCanvasContext;
 
@@ -69,8 +94,17 @@ public class JMEVisualization extends SimpleApplication {
         this.startCanvas();
     }
     
-    public void addGeometry(Geometry geometry) {
-        rootNode.attachChild(geometry);
+    public void addGeometry(final Geometry geometry) {
+        
+        
+        rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
+                
+                @Override
+                public Geometry call() throws Exception {
+                    rootNode.attachChild(geometry.clone());
+                    return null;
+                }
+            });   
     }
     
    
@@ -96,6 +130,14 @@ public class JMEVisualization extends SimpleApplication {
 
     public static void setVisualizationPanel(JPanel visualizationPanel) {
         JMEVisualization.visualizationPanel = visualizationPanel;
+    }
+
+    public ScheduledThreadPoolExecutor getExecutor() {
+        return executor;
+    }
+
+    public void setExecutor(ScheduledThreadPoolExecutor executor) {
+        this.executor = executor;
     }
 
 }

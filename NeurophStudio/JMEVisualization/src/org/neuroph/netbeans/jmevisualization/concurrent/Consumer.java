@@ -41,5 +41,5 @@ public abstract class Consumer implements Runnable {
     public void setSharedQueue(BlockingQueue sharedQueue) {
         this.sharedQueue = sharedQueue;
     }
-
+       
 }
