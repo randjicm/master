@@ -4,16 +4,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.neuroph.dev.noprop.NoPropNet;
 import org.neuroph.dev.noprop.RangeNormalizer;
+import org.neuroph.netbeans.classificationsample.Combinatorics;
 import org.neuroph.netbeans.classificationsample.InputSettngsDialog;
-import org.neuroph.netbeans.visual.TrainingController;
+import org.neuroph.netbeans.classificationsample.MultiLayerPerceptronClassificationSamplePanel;
+import org.neuroph.netbeans.classificationsample.MultiLayerPerceptronClassificationSampleTopComponent;
+import org.neuroph.netbeans.jmevisualization.charts.JMEVisualizationTopComponent;
 import org.neuroph.netbeans.main.ViewManager;
-import org.neuroph.netbeans.visual.NeuralNetAndDataSet;
 import org.neuroph.netbeans.main.easyneurons.dialog.BackpropagationTrainingDialog;
 import org.neuroph.netbeans.main.easyneurons.dialog.HebbianTrainingDialog;
 import org.neuroph.netbeans.main.easyneurons.dialog.SupervisedTrainingDialog;
-import org.neuroph.netbeans.classificationsample.MultiLayerPerceptronClassificationSamplePanel;
-import org.neuroph.netbeans.classificationsample.MultiLayerPerceptronClassificationSampleTopComponent;
-import org.neuroph.netbeans.classificationsample.Combinatorics;
+import org.neuroph.netbeans.visual.NeuralNetAndDataSet;
+import org.neuroph.netbeans.visual.TrainingController;
 import org.neuroph.nnet.Adaline;
 import org.neuroph.nnet.MultiLayerPerceptron;
 import org.neuroph.nnet.NeuroFuzzyPerceptron;
@@ -77,10 +78,21 @@ public final class TrainToolbarAction implements ActionListener {
             }
         }
     }
+    
+    public void JMEVisualizationModuleCheck() {
+        
+       JMEVisualizationTopComponent component = JMEVisualizationTopComponent.findInstance();
+       
+       if(component.isTrainSignal()){
+           component.initializeProducerConsumer(1000);
+           
+       }
+       
+        
+    }
 
     public void train() {
         if (neuralNetAndDataSet.getDataSet() != null) {
-            neuralNetAndDataSet.setDataSet(neuralNetAndDataSet.getDataSet()); // ???????
 
             Class neuralNetClass = neuralNetAndDataSet.getNetwork().getClass();
 
@@ -92,6 +104,7 @@ public final class TrainToolbarAction implements ActionListener {
             } else if (neuralNetClass.equals(MultiLayerPerceptron.class)) {
                 showMLPTrainingDialog();
                 ClassificationSampleModuleCheck();
+                JMEVisualizationModuleCheck();
             } else if (neuralNetClass.equals(SupervisedHebbianNetwork.class)) {
                 showHebbianTrainingDialog();
             } else if (neuralNetClass.equals(NoPropNet.class)) {
