@@ -62,5 +62,5 @@ public class SceneApplication extends SimpleApplication {
         overlayView = getRenderManager().createMainView("Overlay", cam);
         overlayView.setClearFlags(false, true, false);
     }
-
+    
 }
