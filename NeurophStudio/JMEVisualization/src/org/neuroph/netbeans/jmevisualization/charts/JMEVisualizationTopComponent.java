@@ -67,7 +67,7 @@ import org.openide.windows.WindowManager;
     "CTL_JMEVisualizationTopComponent=JMEVisualization Window",
     "HINT_JMEVisualizationTopComponent=This is a JMEVisualization window"
 })
-public final class JMEVisualizationTopComponent extends SceneViewerTopComponent implements LearningEventListener{
+public final class JMEVisualizationTopComponent extends TopComponent implements LearningEventListener{
     
     private static JMEVisualizationTopComponent instance;
     private static final String PREFERRED_ID = "JMEVisualizationTopComponent";
