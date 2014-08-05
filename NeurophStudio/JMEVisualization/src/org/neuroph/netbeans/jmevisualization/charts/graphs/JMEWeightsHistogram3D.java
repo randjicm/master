@@ -63,6 +63,7 @@ public class JMEWeightsHistogram3D extends Graph3DBuilder<Void, Point3D.Float>{
         // create jme scatter graph with these points
         JMEHistogram3DFactory jmeHistogramFactory = new JMEHistogram3DFactory(jmeVisualization);
         jmeHistogramFactory.createHistogram3D(points3D);
+        jmeVisualization.getJmeCanvasContext().getCanvas().requestFocus();
         return null;
     }
     

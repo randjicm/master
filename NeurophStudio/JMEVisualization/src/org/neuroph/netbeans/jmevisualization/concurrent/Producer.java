@@ -20,12 +20,7 @@ public abstract class Producer implements Runnable{
 
     public Producer(NeuralNetAndDataSet neuralNetAndDataSet) {
         this.neuralNetAndDataSet = neuralNetAndDataSet;
-    }
-    
-    public Producer(BlockingQueue sharedQueue, NeuralNetAndDataSet neuralNetAndDataSet) {
-        this.sharedQueue = sharedQueue;   
-        this.neuralNetAndDataSet = neuralNetAndDataSet;
-    }
+    }    
 
     public NeuralNetAndDataSet getNeuralNetAndDataSet() {
         return neuralNetAndDataSet;

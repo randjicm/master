@@ -5,7 +5,6 @@
  */
 package org.neuroph.netbeans.jmevisualization.concurrent.weights;
 
-import java.util.concurrent.BlockingQueue;
 import org.neuroph.core.NeuralNetwork;
 import org.neuroph.core.data.DataSet;
 import org.neuroph.core.data.DataSetRow;
@@ -22,27 +21,17 @@ public class NeuralNetworkWeightsProducer extends Producer {
         super(neuralNetAndDataSet);
     }
     
-    public NeuralNetworkWeightsProducer(BlockingQueue sharedQueue, NeuralNetAndDataSet neuralNetAndDataSet) {
-        super(sharedQueue, neuralNetAndDataSet);
-    }
-
-    public void calculateNeuralNetworkAnswer() {
-        
-        DataSet dataSet = getNeuralNetAndDataSet().getDataSet();
-        NeuralNetwork neuralNetwork = getNeuralNetAndDataSet().getNetwork();
-        
-        for (DataSetRow dataSetRow : dataSet.getRows()) {           
-            neuralNetwork.setInput(dataSetRow.getInput());
-            neuralNetwork.calculate();          
-        }
-        
-    }
-
     @Override
     public void run() {
 
         try {
-            calculateNeuralNetworkAnswer();
+            DataSet dataSet = getNeuralNetAndDataSet().getDataSet();
+            NeuralNetwork neuralNetwork = getNeuralNetAndDataSet().getNetwork();
+
+            for (DataSetRow dataSetRow : dataSet.getRows()) {
+                neuralNetwork.setInput(dataSetRow.getInput());
+                neuralNetwork.calculate();
+            }
             getSharedQueue().put(getNeuralNetAndDataSet().getNetwork());
         } catch (InterruptedException ex) {
 

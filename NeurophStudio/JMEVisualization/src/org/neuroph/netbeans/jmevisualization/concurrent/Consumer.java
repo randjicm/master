@@ -21,11 +21,6 @@ public abstract class Consumer implements Runnable {
         this.jmeVisualization = jmeVisualization;
     }
 
-    public Consumer(BlockingQueue sharedQueue, JMEVisualization jmeVisualization) {
-        this.sharedQueue = sharedQueue;
-        this.jmeVisualization = jmeVisualization;
-    }
-
     public JMEVisualization getJmeVisualization() {
         return jmeVisualization;
     }

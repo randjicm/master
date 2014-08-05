@@ -85,6 +85,7 @@ public final class JMEVisualizationTopComponent extends SceneViewerTopComponent 
     private ProducerConsumer producerConsumer;
     private java.awt.Canvas jmeCanvas;
     private JMEVisualization jmeVisualization;
+    private boolean trainSignal = false;
     
     private JMEVisualizationTopComponent() {
         initComponents();
@@ -145,11 +146,6 @@ public final class JMEVisualizationTopComponent extends SceneViewerTopComponent 
     
     @Override
     public void handleLearningEvent(LearningEvent le) {
-        
-        if (iterationCounter == 0) {
-            
-            producerConsumer.startConsuming();
-        }      
         
         iterationCounter++;
         
@@ -378,6 +374,14 @@ public final class JMEVisualizationTopComponent extends SceneViewerTopComponent 
         this.jmeCanvas = jmeCanvas;
     }
 
+    public boolean isTrainSignal() {
+        return trainSignal;
+    }
+
+    public void setTrainSignal(boolean trainSignal) {
+        this.trainSignal = trainSignal;
+    }
+
     class DTListener implements DropTargetListener {
 
         @Override
@@ -419,17 +423,11 @@ public final class JMEVisualizationTopComponent extends SceneViewerTopComponent 
                 }
 
                 if(neuralNetwork != null && trainingSet != null){
-
+                    trainSignal = true;
                     removeContent();
                     trainingPreprocessing();
                     
                     addContent();
-                    
-                    producerConsumer = new ProducerConsumer(1000);
-                    producerConsumer.setConsumer(new NeuralNetworkWeightsConsumer(jmeVisualization));
-                    producerConsumer.setProducer(new NeuralNetworkWeightsProducer(neuralNetAndDataSet));
-                    
-//                    JMEVisualizationTopComponent.this.requestActive();
                     
                 }
                 
@@ -442,8 +440,20 @@ public final class JMEVisualizationTopComponent extends SceneViewerTopComponent 
         }
     }
     
+    public void initializeProducerConsumer(int queueSize) {
+        
+        trainSignal = false;
+        
+        producerConsumer = new ProducerConsumer(1000);
+        producerConsumer.setConsumer(new NeuralNetworkWeightsConsumer(jmeVisualization));
+        producerConsumer.setProducer(new NeuralNetworkWeightsProducer(neuralNetAndDataSet));
+        
+        producerConsumer.startConsuming();
+
+    }
+    
     /*
-     * Collects all the information needed for training neural network
+     * Collects all the information needed for neural network training
      */
     public void trainingPreprocessing() {
         neuralNetAndDataSet = new NeuralNetAndDataSet(neuralNetwork, trainingSet);
@@ -466,8 +476,7 @@ public final class JMEVisualizationTopComponent extends SceneViewerTopComponent 
         
     }
     
-    public void addContent(){
-        
+    public void addContent(){       
         content.add(neuralNetAndDataSet);
         content.add(trainingController);
         JMEVisualizationTopComponent.this.requestActive();
