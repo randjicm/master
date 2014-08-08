@@ -21,6 +21,7 @@ import org.neuroph.core.NeuralNetwork;
 import org.neuroph.core.data.DataSet;
 import org.neuroph.core.events.LearningEvent;
 import org.neuroph.core.events.LearningEventListener;
+import org.neuroph.netbeans.jmevisualization.IOSettingsDialog;
 import org.neuroph.netbeans.jmevisualization.JMEVisualization;
 import org.neuroph.netbeans.jmevisualization.charts.graphs.JMEDatasetHistogram3D;
 import org.neuroph.netbeans.jmevisualization.charts.graphs.JMEDatasetScatter3D;
@@ -28,6 +29,8 @@ import org.neuroph.netbeans.jmevisualization.charts.graphs.JMEWeightsHistogram3D
 import org.neuroph.netbeans.jmevisualization.concurrent.Consumer;
 import org.neuroph.netbeans.jmevisualization.concurrent.Producer;
 import org.neuroph.netbeans.jmevisualization.concurrent.ProducerConsumer;
+import org.neuroph.netbeans.jmevisualization.concurrent.dataset.DataSetConsumer;
+import org.neuroph.netbeans.jmevisualization.concurrent.dataset.DataSetProducer;
 import org.neuroph.netbeans.jmevisualization.concurrent.weights.NeuralNetworkWeightsConsumer;
 import org.neuroph.netbeans.jmevisualization.concurrent.weights.NeuralNetworkWeightsProducer;
 import org.neuroph.netbeans.visual.NeuralNetAndDataSet;
@@ -81,11 +84,13 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     private NeuralNetAndDataSet neuralNetAndDataSet;
     private TrainingController trainingController;
     private Thread firstCalculation = null;
-    private int iterationCounter = 0;
+    private int iterationCounter = 1;
     private ProducerConsumer producerConsumer;
     private java.awt.Canvas jmeCanvas;
     private JMEVisualization jmeVisualization;
     private boolean trainSignal = false;
+    private Consumer consumer;
+    private Producer producer;
     
     private JMEVisualizationTopComponent() {
         initComponents();
@@ -285,20 +290,20 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                
+
                 jmeVisualization = new JMEVisualization();
                 jmeVisualization.setWidth(getVisualizationPanel().getWidth() - 15);
                 jmeVisualization.setHeight(getVisualizationPanel().getHeight() - 30);
                 jmeVisualization.startApplication();
-                
+
                 jmeCanvas = jmeVisualization.getJmeCanvasContext().getCanvas();
-                
+
                 getVisualizationPanel().setLayout(new FlowLayout());
                 getVisualizationPanel().add(jmeCanvas);
                 getVisualizationPanel().revalidate();
-                
+
             }
-        });      
+        });
     }
     
     @Override
@@ -333,18 +338,19 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     // created demo dataset
     public DataSet createSphereDataSet() {
 
-        DataSet d = new DataSet(3, 1);
+        DataSet d = new DataSet(3, 2);
         Random r = new Random();
-        for (int i = 1; i <= 8000; i++) {
+        for (int i = 1; i <= 5000; i++) {
 
-            double x = Math.round(r.nextGaussian() * 100);
-            double y = Math.round(r.nextGaussian() * 100);
-            double z = Math.round(r.nextGaussian() * 100);
-
-            if ((getCategoryMembership(x, y, z, 0, 0, 0, 100, 100, 100)) >= 0.5) {
-                //d.addRow(new double[]{x, y, z}, new double[]{1.0});
+            double x = Math.round(r.nextGaussian());
+            double y = Math.round(r.nextGaussian());
+            double z = Math.round(r.nextGaussian());
+            
+            double c1 = (getCategoryMembership(x, y, z, 0, 0, 0, 1, 1, 1));
+            if ( c1>= 1) {
+                d.addRow(new double[]{x, y, z}, new double[]{1.0, 0.0});
             } else {
-                d.addRow(new double[]{x, y, z}, new double[]{0.0});
+                d.addRow(new double[]{x, y, z}, new double[]{0.0, 1.0});
             }
 
         }
@@ -415,7 +421,12 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 NeuralNetwork nnet = dataObject.getLookup().lookup(NeuralNetwork.class);//get the object from lookup listener
                         
                 if (dataSet != null) {
-                    trainingSet = dataSet;
+                    trainingSet = createSphereDataSet();//dataSet;
+                    
+                    IOSettingsDialog dataSetSettings = IOSettingsDialog.getInstance();
+                    dataSetSettings.initializeInformation(trainingSet);
+                    dataSetSettings.setVisible(true);
+                    
                 }
 
                 if (nnet != null) {
@@ -423,7 +434,10 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 }
 
                 if(neuralNetwork != null && trainingSet != null){
+                    
+                    jmeVisualization.detachAllChildrenFromAnotherThread();
                     trainSignal = true;
+                    
                     removeContent();
                     trainingPreprocessing();
                     
@@ -432,9 +446,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 }
                 
                 e.dropComplete(true);
-            } catch (UnsupportedFlavorException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (IOException ex) {
+            } catch (UnsupportedFlavorException | IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
         }
@@ -443,10 +455,11 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     public void initializeProducerConsumer(int queueSize) {
         
         trainSignal = false;
-        
-        producerConsumer = new ProducerConsumer(1000);
-        producerConsumer.setConsumer(new NeuralNetworkWeightsConsumer(jmeVisualization));
-        producerConsumer.setProducer(new NeuralNetworkWeightsProducer(neuralNetAndDataSet));
+        consumer = new DataSetConsumer(jmeVisualization);
+        producer = new DataSetProducer(neuralNetAndDataSet);
+        producerConsumer = new ProducerConsumer(queueSize);
+        producerConsumer.setConsumer(consumer);//
+        producerConsumer.setProducer(producer);//
         
         producerConsumer.startConsuming();
 

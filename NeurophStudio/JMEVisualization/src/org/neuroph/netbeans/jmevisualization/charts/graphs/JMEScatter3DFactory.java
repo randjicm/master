@@ -1,7 +1,6 @@
 package org.neuroph.netbeans.jmevisualization.charts.graphs;
 
 import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Sphere;
@@ -19,7 +18,7 @@ import org.nugs.graph3d.api.Scatter3DProperties;
  */
 public class JMEScatter3DFactory implements Scatter3DFactory<Void, Point3D.Float>{
     
-    private JMEVisualization jmeVisualization;    
+    private final JMEVisualization jmeVisualization;    
 
     public JMEScatter3DFactory(JMEVisualization jmeVisualization) {
         this.jmeVisualization = jmeVisualization;        
@@ -32,7 +31,9 @@ public class JMEScatter3DFactory implements Scatter3DFactory<Void, Point3D.Float
     @Override
     public Void createScatter3D(Point3D.Float[] points, Scatter3DProperties prop) {
         
-        Beans.setDesignTime(false);       
+        Beans.setDesignTime(false);  
+        jmeVisualization.detachAllChildrenFromAnotherThread();
+        jmeVisualization.attachCoordinateSystem(1, 10);
         Vector3f[] data = new Vector3f[points.length];     
         for (int i = 0; i < points.length; i++) {           
             data[i] = new Vector3f(points[i].getX(), points[i].getY(), points[i].getZ());              
@@ -42,17 +43,11 @@ public class JMEScatter3DFactory implements Scatter3DFactory<Void, Point3D.Float
         for (int i = 0; i < points.length; i++) {
             Geometry sphereGeometry = new Geometry("sphere " + i, sphere);
             Material m = new Material(jmeVisualization.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-//            if ((getCategoryMembership(data[i].x, data[i].y, data[i].z, 0, 0, 0, 100, 100, 100)) >= 0.5){
-//                m.setColor("Color", c1);
-//            }
-//            else{
-//                m.setColor("Color", c2);
-//            }
-             m.setColor("Color",  ColorRGBA.Red);
+            m.setColor("Color",  prop.getoutputColors().get(i));
             sphereGeometry.setMaterial(m);
-            sphereGeometry.move(data[i]);
-
-            //jmeVisualization.addGeometry(sphereGeometry);
+            sphereGeometry.move(data[i].x*100, data[i].y*100, data[i].z*100);
+        
+            jmeVisualization.attachChildFromAnotherThread(sphereGeometry);
         }        
                          
         return null;
