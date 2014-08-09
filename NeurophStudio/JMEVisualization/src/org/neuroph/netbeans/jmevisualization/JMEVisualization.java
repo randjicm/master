@@ -7,11 +7,14 @@ package org.neuroph.netbeans.jmevisualization;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.control.UpdateControl;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 import java.awt.Dimension;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import org.openide.util.Exceptions;
 
 /**
  * JME based Visualization Component
@@ -58,7 +61,7 @@ public class JMEVisualization extends SimpleApplication {
 
         this.startCanvas();
     }
-    
+
     public void attachChildFromAnotherThread(final Geometry geometry) {
         rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
 
@@ -78,28 +81,57 @@ public class JMEVisualization extends SimpleApplication {
 
             @Override
             public Geometry call() throws Exception {
-                rootNode.detachAllChildren();   
+                rootNode.detachAllChildren();
                 getJmeCanvasContext().getCanvas().requestFocus();
                 return null;
             }
         });
     }
-    
-    public void attachCoordinateSystem(final int range, final int gridDensity){
+
+    public void attachCoordinateSystem(final int range, final int gridDensity) {
         rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
 
             @Override
             public Geometry call() throws Exception {
-                                
+
                 CoordinateSystem coordinateSys = new CoordinateSystem(range);
                 Geometry coordinateSystem = coordinateSys.generatePlanes(gridDensity);
                 coordinateSystem.setMaterial(new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md"));
                 rootNode.attachChild(coordinateSystem);
                 getJmeCanvasContext().getCanvas().requestFocus();
-                
+
                 return null;
             }
         });
+    }
+
+    public void updateModelBound() {
+        rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
+
+            @Override
+            public Geometry call() throws Exception {
+
+                rootNode.updateModelBound();
+                return null;
+            }
+        });
+    }
+
+    public Spatial getChild(final String name) {
+        try {
+            return rootNode.getControl(UpdateControl.class).enqueue(new Callable<Spatial>() {
+                
+                @Override
+                public Spatial call() throws Exception {
+                    Spatial s = rootNode.getChild(name);
+                    return s;
+                    
+                }
+            }).get();
+        } catch (InterruptedException | ExecutionException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return null;
     }
 
     public int getWidth() {

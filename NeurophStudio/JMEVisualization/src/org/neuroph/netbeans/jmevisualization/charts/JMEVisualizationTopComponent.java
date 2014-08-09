@@ -31,6 +31,7 @@ import org.neuroph.netbeans.jmevisualization.concurrent.Producer;
 import org.neuroph.netbeans.jmevisualization.concurrent.ProducerConsumer;
 import org.neuroph.netbeans.jmevisualization.concurrent.dataset.DataSetConsumer;
 import org.neuroph.netbeans.jmevisualization.concurrent.dataset.DataSetProducer;
+import org.neuroph.netbeans.jmevisualization.concurrent.simulation.TrainingSimulatorProducer;
 import org.neuroph.netbeans.jmevisualization.concurrent.weights.NeuralNetworkWeightsConsumer;
 import org.neuroph.netbeans.jmevisualization.concurrent.weights.NeuralNetworkWeightsProducer;
 import org.neuroph.netbeans.visual.NeuralNetAndDataSet;
@@ -342,9 +343,9 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         Random r = new Random();
         for (int i = 1; i <= 5000; i++) {
 
-            double x = Math.round(r.nextGaussian());
-            double y = Math.round(r.nextGaussian());
-            double z = Math.round(r.nextGaussian());
+            double x = r.nextGaussian();
+            double y = r.nextGaussian();
+            double z = r.nextGaussian();
             
             double c1 = (getCategoryMembership(x, y, z, 0, 0, 0, 1, 1, 1));
             if ( c1>= 1) {
