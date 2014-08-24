@@ -18,7 +18,7 @@ import org.nugs.graph3d.api.Point3D;
 public class JMEDatasetHistogram3D extends Graph3DBuilder<Void, Point3D.Float>{
     
     private DataSet dataset;
-    private JMEVisualization jmeVisualization;
+    private final JMEVisualization jmeVisualization;
     
     public JMEDatasetHistogram3D(DataSet dataset, JMEVisualization jmeVisualization) {
         super();

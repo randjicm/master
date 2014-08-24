@@ -8,6 +8,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.control.UpdateControl;
+import com.jme3.scene.debug.Grid;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 import java.awt.Dimension;
@@ -103,6 +104,31 @@ public class JMEVisualization extends SimpleApplication {
             }
         });
     }
+    
+    public void attachHistoramGrid(final int maxBarsLength) {
+        rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
+
+            @Override
+            public Geometry call() throws Exception {
+                Geometry xPlane = new Geometry("xPlane", new Grid(maxBarsLength, 10, 10));
+                Geometry yPlane = (Geometry) new Geometry("yPlane", new Grid(10, 10, 10)).rotate(1.57f, 0, 0);
+                Geometry zPlane = (Geometry) new Geometry("zPlane", new Grid(10, 10, 10)).rotate(0, 0, 1.57f);
+                Material m = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+                xPlane.setMaterial(m);
+                yPlane.setMaterial(m);
+                zPlane.setMaterial(m);
+                xPlane.move(50, 0, 50);
+                rootNode.attachChild(xPlane);
+                rootNode.attachChild(yPlane);
+                rootNode.attachChild(zPlane);
+
+                getJmeCanvasContext().getCanvas().requestFocus();
+
+                return null;
+            }
+        });
+
+    }
 
     public void updateModelBound() {
         rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
@@ -144,22 +170,6 @@ public class JMEVisualization extends SimpleApplication {
         });
     }
     
-//    public Spatial rotateRootNode(final float xAngle, final float yAngle, final float zAngle){
-//        try {
-//            return rootNode.getControl(UpdateControl.class).enqueue(new Callable<Spatial>() {
-//                
-//                @Override
-//                public Spatial call() throws Exception {
-//                    
-//                    return rootNode.rotate(xAngle, yAngle, zAngle);
-//                }
-//            }).get();
-//        } catch (InterruptedException | ExecutionException ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
-//        return null;
-//    }
-//    
 
     public int getWidth() {
         return width;

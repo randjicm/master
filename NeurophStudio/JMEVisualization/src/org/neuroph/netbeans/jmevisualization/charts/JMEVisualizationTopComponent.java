@@ -481,7 +481,6 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
 
                 if(neuralNetwork != null && trainingSet != null){
                     
-                    //jmeVisualization.detachAllChildren();
                     trainSignal = true;
                     
                     removeContent();
@@ -504,23 +503,15 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     
     public DataSet generateRandomDataSet(int inputsNumber, int outputsNumber, int rows) {
         
-        DataSet dataSet = new DataSet(inputsNumber, outputsNumber);
-        
-        for (int i = 1; i <= rows; i++) {
-            
-            double[] inputs = new double[inputsNumber];
-            
+        DataSet dataSet = new DataSet(inputsNumber, outputsNumber);        
+        for (int i = 1; i <= rows; i++) {            
+            double[] inputs = new double[inputsNumber];           
             for (int j = 0; j < inputs.length; j++) {
                 inputs[j] = randInt(-100, 100) / 100.0;
-
-            }
-            
-            double[] outputs = new double[outputsNumber];
-            
+            }          
+            double[] outputs = new double[outputsNumber];          
             outputs[randInt(0, outputsNumber-1)] = randInt(1, outputsNumber);
-
             dataSet.addRow(new DataSetRow(inputs, outputs));
-
         }
         return dataSet;
     }

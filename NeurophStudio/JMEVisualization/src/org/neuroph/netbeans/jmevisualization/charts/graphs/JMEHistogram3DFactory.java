@@ -32,8 +32,10 @@ public class JMEHistogram3DFactory implements Histogram3DFactory<Void, Point3D.F
 
         Beans.setDesignTime(false);
         jmeVisualization.detachAllChildren();
-        jmeVisualization.attachCoordinateSystem(1, 10);
+        //jmeVisualization.attachCoordinateSystem(1, 10);
+        jmeVisualization.attachHistoramGrid(prop.getMaxBarsSize());
         Vector3f[] data = new Vector3f[points.length];
+        
         float maxZ = 0;
         for (int i = 1; i < points.length; i++) {
             data[i] = new Vector3f(points[i].getX(), points[i].getY(), points[i].getZ());
@@ -45,7 +47,7 @@ public class JMEHistogram3DFactory implements Histogram3DFactory<Void, Point3D.F
         for (int i = 1; i < points.length; i++) {
             //x-layers count, y-connections count, z-weight value
             float barHeight = data[i].z * 100 / maxZ;
-            final Geometry cylinderGeometry = new Geometry("cylinder " + i, new Cylinder(32, 32, 2f, barHeight, true));
+            final Geometry cylinderGeometry = new Geometry("cylinder " + i, new Cylinder(32, 32, prop.getRadius(), barHeight, true));
             Material m = new Material(jmeVisualization.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
             
             if (data[i].z >= 0) {
@@ -67,5 +69,5 @@ public class JMEHistogram3DFactory implements Histogram3DFactory<Void, Point3D.F
     @Override
     public Void createHistogram3D(Point3D.Float[] points) {
         return createHistogram3D(points, new Histogram3DProperties());
-    }   
+    }    
 }

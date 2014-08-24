@@ -6,11 +6,13 @@
 
 package org.neuroph.netbeans.jmevisualization.charts.graphs;
 
+import org.neuroph.core.Layer;
 import org.neuroph.core.NeuralNetwork;
 import org.neuroph.netbeans.charts.graphs3d.Graph3DBuilder;
 import org.neuroph.netbeans.jmevisualization.JMEVisualization;
 import org.neuroph.netbeans.jmevisualization.charts.providers.WeightsDataProvider3D;
 import org.nugs.graph2d.api.Attribute;
+import org.nugs.graph3d.api.Histogram3DProperties;
 import org.nugs.graph3d.api.Point3D;
 
 /**
@@ -69,7 +71,20 @@ public class JMEWeightsHistogram3D extends Graph3DBuilder<Void, Point3D.Float>{
         
         // create jme scatter graph with these points
         JMEHistogram3DFactory jmeHistogramFactory = new JMEHistogram3DFactory(jmeVisualization);
-        jmeHistogramFactory.createHistogram3D(points3D);
+        Histogram3DProperties prop = new Histogram3DProperties();
+        
+        int maxBarsSize = -1;
+        for (int i = 0; i < neuralNetwork.getLayersCount(); i++) {
+            Layer l = neuralNetwork.getLayerAt(i);
+            if (l.getNeuronsCount() > maxBarsSize) {
+                maxBarsSize = l.getNeuronsCount();
+            }
+        }
+        
+        prop.setMaxBarsSize(maxBarsSize);   
+        prop.setRadius(2f);
+        jmeHistogramFactory.createHistogram3D(points3D, prop);
+        
         jmeVisualization.getJmeCanvasContext().getCanvas().requestFocus();
         return null;
     }
