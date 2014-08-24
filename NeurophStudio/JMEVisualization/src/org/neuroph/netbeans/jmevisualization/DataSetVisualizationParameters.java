@@ -21,12 +21,12 @@ public class DataSetVisualizationParameters {
     
     private int[] inputs;
     
-    private ArrayList<ColorRGBA> outputColors;
+    private ArrayList<ColorRGBA> dominantOutputColors;
 
-    public DataSetVisualizationParameters(DataSet dataSet, int[] inputs, ArrayList<ColorRGBA> outputColors) {
+    public DataSetVisualizationParameters(DataSet dataSet, int[] inputs, ArrayList<ColorRGBA> dominantOutputColors) {
         this.dataSet = dataSet;
         this.inputs = inputs;
-        this.outputColors = outputColors;
+        this.dominantOutputColors = dominantOutputColors;
     }
 
     
@@ -41,12 +41,12 @@ public class DataSetVisualizationParameters {
         this.dataSet = dataSet;
     }
 
-    public ArrayList<ColorRGBA> getOutputColors() {
-        return outputColors;
+    public ArrayList<ColorRGBA> getDominantOutputColors() {
+        return dominantOutputColors;
     }
 
-    public void setOutputColors(ArrayList<ColorRGBA> outputColors) {
-        this.outputColors = outputColors;
+    public void setDominantOutputColors(ArrayList<ColorRGBA> dominantOutputColors) {
+        this.dominantOutputColors = dominantOutputColors;
     }
 
     public int[] getInputs() {

@@ -7,6 +7,7 @@ package org.neuroph.netbeans.jmevisualization;
 
 import com.jme3.math.ColorRGBA;
 import java.util.ArrayList;
+import java.util.Random;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import org.neuroph.core.data.DataSet;
@@ -18,6 +19,12 @@ import org.neuroph.netbeans.jmevisualization.charts.graphs.JMEDatasetScatter3D;
  */
 public class IOSettingsDialog extends javax.swing.JDialog {
 
+    private static IOSettingsDialog instance;
+    private ArrayList<ColorRGBA> outputColors;
+    private JMEVisualization jmeVisualization;
+    private DataSet dataSet;
+    private int[] inputs;
+
     /**
      * Creates new form InputSettngsDialog
      */
@@ -27,20 +34,13 @@ public class IOSettingsDialog extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }
 
-    private static IOSettingsDialog instance;
-    private ArrayList<ColorRGBA> outputColors;
-    private JMEVisualization jmeVisualization;
-    private DataSet dataSet;
-
     public static IOSettingsDialog getInstance() {
         if (instance == null) {
-            instance =  new IOSettingsDialog(null, true);
-        } 
-            return instance;
-        
-    }
+            instance = new IOSettingsDialog(null, true);
+        }
+        return instance;
 
-    private int[] inputs;
+    }
 
     public void storeInputs(int[] inputs) {
         this.inputs = inputs;
@@ -48,6 +48,78 @@ public class IOSettingsDialog extends javax.swing.JDialog {
 
     public int[] getStoredInputs() {
         return inputs;
+    }
+
+    public ArrayList<ColorRGBA> getOutputColors() {
+        return outputColors;
+    }
+
+    public void setOutputColors(ArrayList<ColorRGBA> outputColors) {
+        this.outputColors = outputColors;
+    }
+
+    public void initializeInformation(DataSet dataSet, JMEVisualization jmeVisualization) {
+
+        this.dataSet = dataSet;
+        this.jmeVisualization = jmeVisualization;
+
+        String[] inputNames = new String[dataSet.getInputSize()];
+
+        for (int i = 0; i < inputNames.length; i++) {
+            int k = i + 1;
+            inputNames[i] = "Input " + k;
+        }
+
+        comboX.setModel(new DefaultComboBoxModel(inputNames));
+        comboY.setModel(new DefaultComboBoxModel(inputNames));
+        comboZ.setModel(new DefaultComboBoxModel(inputNames));
+
+        outputColors = new ArrayList<>(dataSet.getOutputSize());
+
+        for (int i = 1; i <= dataSet.getOutputSize(); i++) {
+            float r = randInt(0, 100) / 100.0f;
+            float g = randInt(0, 100) / 100.0f;
+            float b = randInt(0, 100) / 100.0f;
+            float a = 0.3f;
+            outputColors.add(new ColorRGBA(r, g, b, a));
+        }
+        System.out.println("SIZE: " + outputColors.size());
+    }
+
+    public ArrayList<ColorRGBA> calculateDominantOutputColors() {
+
+        ArrayList<ColorRGBA> colors = new ArrayList<>();
+
+        for (int i = 0; i < dataSet.size(); i++) {
+            double[] outputValues = dataSet.getRowAt(i).getDesiredOutput();
+            int index = 0;
+            double max = Double.MIN_VALUE;
+            for (int j = 0; j < outputValues.length; j++) {
+                if (Math.abs(outputValues[j]) > max) {
+                    max = outputValues[j];
+                    index = j;
+                }
+            }
+            colors.add(outputColors.get(index));
+        }
+        return colors;
+    }
+
+    private static int randInt(int min, int max) {
+        return new Random().nextInt((max - min) + 1) + min;
+    }
+
+    private void drawDataSet() {
+        Thread t = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                JMEDatasetScatter3D jmeDataSetScatter = new JMEDatasetScatter3D(dataSet, getStoredInputs(), calculateDominantOutputColors(), jmeVisualization);
+                jmeDataSetScatter.createGraph();
+            }
+        });
+        t.start();
+
     }
 
     /**
@@ -158,7 +230,7 @@ public class IOSettingsDialog extends javax.swing.JDialog {
             comboZ.setSelectedIndex(0);
         } else {
             storeInputs(new int[]{x, y, z});
-            drawDataSet();           
+            drawDataSet();
             dispose();
         }
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -200,70 +272,6 @@ public class IOSettingsDialog extends javax.swing.JDialog {
         });
     }
 
-    public void initializeInformation(DataSet dataSet, JMEVisualization jmeVisualization) {
-        this.dataSet = dataSet;
-        this.jmeVisualization = jmeVisualization;
-        String[] inputNames = new String[dataSet.getInputSize()];
-
-        for (int i = 0; i < inputNames.length; i++) {
-            int k = i + 1;
-            inputNames[i] = "Input " + k;
-
-        }
-
-        comboX.setModel(new DefaultComboBoxModel(inputNames));
-        comboY.setModel(new DefaultComboBoxModel(inputNames));
-        comboZ.setModel(new DefaultComboBoxModel(inputNames));
-        
-        outputColors = new ArrayList<>(dataSet.getOutputSize());//ColorRGBA[dataSet.getOutputSize()];
-        for (int i = 0; i < dataSet.getOutputSize(); i++) {
-            float r = (i+1)/dataSet.getOutputSize();
-            float g = 1-(i+1)/dataSet.getOutputSize();
-            float b = (i+1)*0.3f;
-            float a = 0.3f;
-            outputColors.add(new ColorRGBA(r,g,b,a));
-
-        }
-        
-        
-    }
-    
-    private void drawDataSet() {
-        Thread t = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                JMEDatasetScatter3D jmeDataSetScatter = new JMEDatasetScatter3D(dataSet, getStoredInputs(), calculateOutputColors(), jmeVisualization);
-                jmeDataSetScatter.createGraph();
-            }
-        });
-        t.start();
-
-    }
-    
-    public ArrayList<ColorRGBA> calculateOutputColors(){
-        ArrayList<ColorRGBA> colors = new ArrayList<>();
-        
-        for (int i = 0; i < dataSet.size(); i++) {
-            
-            double[] outputValues = dataSet.getRowAt(i).getDesiredOutput();
-            int index = 0;
-            double max = Double.MIN_VALUE;
-            for (int j = 0; j < outputValues.length; j++) {
-                if (Math.abs(outputValues[j]) > max) {
-                    max = outputValues[j];
-                    index = j;
-                }
-
-            }
-            colors.add(getOutputColors().get(index));
-            
-        }
-        return colors;
-    }
-    
-   
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox comboX;
     private javax.swing.JComboBox comboY;
@@ -275,11 +283,4 @@ public class IOSettingsDialog extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 
-    public ArrayList<ColorRGBA> getOutputColors() {
-        return outputColors;
-    }
-
-    public void setOutputColors(ArrayList<ColorRGBA> outputColors) {
-        this.outputColors = outputColors;
-    }
 }

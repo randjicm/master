@@ -12,19 +12,19 @@ import org.nugs.graph3d.api.Scatter3DProperties;
 
 /**
  * Uses JMEScatter3DFactory to create scatter graph for dataset
- * 
+ *
  * @author Milos Randjic
  */
-public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float>{
+public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float> {
 
     private DataSet dataset;
     private int[] inputs;
-    private ArrayList<ColorRGBA> outputColors;
+    private ArrayList<ColorRGBA> dominantOutputColors;
     private JMEVisualization jmeVisualization;
     private Scatter3DProperties properties;
     private JMEScatter3DFactory jmeScatterFactory;
     private Point3D.Float[] points3D;
-    
+
     public JMEDatasetScatter3D(DataSet dataset, JMEVisualization jmeVisualization) {
         super();
         dataProvider3D = new DatasetDataProvider3D(dataset);
@@ -32,44 +32,37 @@ public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float>{
         this.jmeVisualization = jmeVisualization;
     }
 
-    public JMEDatasetScatter3D(DataSet dataset, int[] inputs, ArrayList<ColorRGBA> outputColors, JMEVisualization jmeVisualization) {
+    public JMEDatasetScatter3D(DataSet dataset, int[] inputs, ArrayList<ColorRGBA> dominantOutputColors, JMEVisualization jmeVisualization) {
         super();
         dataProvider3D = new DatasetDataProvider3D(dataset);
         this.dataset = dataset;
         this.inputs = inputs;
-        this.outputColors = outputColors;
+        this.dominantOutputColors = dominantOutputColors;
         this.jmeVisualization = jmeVisualization;
-        initializeScatter();
-    }
-
-    public DataSet getDataset() {
-        return dataset;
-    }
-
-    public void setDataset(DataSet dataset) {
-        this.dataset = dataset;
-    }
-    
-     public Scatter3DProperties getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Scatter3DProperties properties) {
-        this.properties = properties;
     }
 
     @Override
-    public String toString() {
-        return "Scatter";
-    }
+    public Void createGraph() {
         
-    @Override
-    public Void createGraph() { 
-        
+        setAttribute1(new Attribute(inputs[0], false, "Attribute"));
+        setAttribute2(new Attribute(inputs[1], false, "Attribute"));
+        setAttribute3(new Attribute(inputs[2], false, "Attribute"));
+
+        points3D = (Point3D.Float[]) dataProvider3D.getData(attribute1, attribute2, attribute3);
+
+        properties = new Scatter3DProperties();
+        properties.setDotSize(1f);
+        properties.setxAxeLabel(attribute1.getLabel());
+        properties.setyAxeLabel(attribute2.getLabel());
+        properties.setzAxeLabel(attribute3.getLabel());
+        properties.setDominantOutputColors(dominantOutputColors);
+
+        jmeScatterFactory = new JMEScatter3DFactory(jmeVisualization);
+
         jmeScatterFactory.createScatter3D(points3D, properties);
 
         return null;
-    }   
+    }
 
     public int[] getInputs() {
         return inputs;
@@ -86,23 +79,26 @@ public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float>{
     public void setJmeVisualization(JMEVisualization jmeVisualization) {
         this.jmeVisualization = jmeVisualization;
     }
-    
-    private void initializeScatter(){
-        
-        setAttribute1(new Attribute(inputs[0], false, "Attribute"));
-        setAttribute2(new Attribute(inputs[1], false, "Attribute"));
-        setAttribute3(new Attribute(inputs[2], false, "Attribute"));
-        
-        points3D = (Point3D.Float[]) dataProvider3D.getData(attribute1, attribute2, attribute3);
-        
-        properties = new Scatter3DProperties();
-        properties.setDotSize(1f);
-        properties.setxAxeLabel(attribute1.getLabel());
-        properties.setyAxeLabel(attribute2.getLabel());
-        properties.setzAxeLabel(attribute3.getLabel());  
-        properties.setOutputColors(outputColors);
-        
-        jmeScatterFactory = new JMEScatter3DFactory(jmeVisualization);
-        //jmeScatterFactory.initializeObjects(points3D, properties);
+
+    public DataSet getDataset() {
+        return dataset;
     }
+
+    public void setDataset(DataSet dataset) {
+        this.dataset = dataset;
+    }
+
+    public Scatter3DProperties getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Scatter3DProperties properties) {
+        this.properties = properties;
+    }
+
+    @Override
+    public String toString() {
+        return "Scatter";
+    }
+
 }

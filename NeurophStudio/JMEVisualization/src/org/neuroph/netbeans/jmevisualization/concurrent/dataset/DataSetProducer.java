@@ -29,6 +29,7 @@ public class DataSetProducer extends Producer{
     @Override
     public void run() {
         try {
+            
             DataSet dataSet = getNeuralNetAndDataSet().getDataSet();
             NeuralNetwork neuralNetwork = getNeuralNetAndDataSet().getNetwork();
             
@@ -36,20 +37,21 @@ public class DataSetProducer extends Producer{
             parameters.setDataSet(dataSet);
             parameters.setInputs(IOSettingsDialog.getInstance().getStoredInputs());
             
-            ArrayList<ColorRGBA> outputColors = new ArrayList<>(dataSet.size());
+            ArrayList<ColorRGBA> dominantOutputColors = new ArrayList<>(dataSet.size());
             
             for (DataSetRow dataSetRow : dataSet.getRows()) {
                 
                 neuralNetwork.setInput(dataSetRow.getInput());
                 neuralNetwork.calculate();
                 
-                outputColors.add(getDominantOutputColor(neuralNetwork));
+                dominantOutputColors.add(getDominantOutputColor(neuralNetwork));
 
             }
-            
-            parameters.setOutputColors(outputColors);
+                       
+            parameters.setDominantOutputColors(dominantOutputColors);
 
             getSharedQueue().put(parameters);
+            
         } catch (InterruptedException ex) {
 
         }

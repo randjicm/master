@@ -1,6 +1,5 @@
 package org.neuroph.netbeans.jmevisualization.charts;
 
-import com.jme3.gde.core.sceneviewer.SceneViewerTopComponent;
 import java.awt.FlowLayout;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -12,7 +11,6 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
@@ -32,11 +30,11 @@ import org.neuroph.netbeans.jmevisualization.concurrent.Producer;
 import org.neuroph.netbeans.jmevisualization.concurrent.ProducerConsumer;
 import org.neuroph.netbeans.jmevisualization.concurrent.dataset.DataSetConsumer;
 import org.neuroph.netbeans.jmevisualization.concurrent.dataset.DataSetProducer;
-import org.neuroph.netbeans.jmevisualization.concurrent.simulation.TrainingSimulatorProducer;
 import org.neuroph.netbeans.jmevisualization.concurrent.weights.NeuralNetworkWeightsConsumer;
 import org.neuroph.netbeans.jmevisualization.concurrent.weights.NeuralNetworkWeightsProducer;
 import org.neuroph.netbeans.visual.NeuralNetAndDataSet;
 import org.neuroph.netbeans.visual.TrainingController;
+import org.neuroph.nnet.MultiLayerPerceptron;
 import org.neuroph.nnet.learning.LMS;
 import org.neuroph.nnet.learning.MomentumBackpropagation;
 import org.openide.awt.ActionID;
@@ -176,6 +174,12 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         jPanel3 = new javax.swing.JPanel();
         radioDataSet = new javax.swing.JRadioButton();
         radioWeights = new javax.swing.JRadioButton();
+        jLabel1 = new javax.swing.JLabel();
+        txtInputsSize = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
+        txtOutputsSize = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        txtSize = new javax.swing.JTextField();
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -187,7 +191,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         visualizationPanel.setLayout(visualizationPanelLayout);
         visualizationPanelLayout.setHorizontalGroup(
             visualizationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 605, Short.MAX_VALUE)
+            .addGap(0, 601, Short.MAX_VALUE)
         );
         visualizationPanelLayout.setVerticalGroup(
             visualizationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -205,6 +209,28 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         buttonGroup1.add(radioWeights);
         org.openide.awt.Mnemonics.setLocalizedText(radioWeights, org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.radioWeights.text")); // NOI18N
 
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.jLabel1.text")); // NOI18N
+
+        txtInputsSize.setText(org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.txtInputsSize.text")); // NOI18N
+        txtInputsSize.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtInputsSizeActionPerformed(evt);
+            }
+        });
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.jLabel2.text")); // NOI18N
+
+        txtOutputsSize.setText(org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.txtOutputsSize.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.jLabel3.text")); // NOI18N
+
+        txtSize.setText(org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.txtSize.text")); // NOI18N
+        txtSize.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtSizeActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -213,8 +239,18 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(radioDataSet)
-                    .addComponent(radioWeights))
-                .addContainerGap(123, Short.MAX_VALUE))
+                    .addComponent(radioWeights)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtInputsSize, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtOutputsSize, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtSize, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(107, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -223,6 +259,18 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 .addComponent(radioDataSet)
                 .addGap(18, 18, 18)
                 .addComponent(radioWeights)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(txtInputsSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(txtOutputsSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(txtSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -231,7 +279,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(visualizationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 609, Short.MAX_VALUE)
+                .addComponent(visualizationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 605, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -253,12 +301,26 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void txtInputsSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtInputsSizeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtInputsSizeActionPerformed
+
+    private void txtSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSizeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtSizeActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JRadioButton radioDataSet;
     private javax.swing.JRadioButton radioWeights;
+    private javax.swing.JTextField txtInputsSize;
+    private javax.swing.JTextField txtOutputsSize;
+    private javax.swing.JTextField txtSize;
     private javax.swing.JPanel visualizationPanel;
     // End of variables declaration//GEN-END:variables
     
@@ -391,7 +453,9 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         @Override
         public void drop(DropTargetDropEvent e) {
             try {
-                
+                int inputs = Integer.parseInt(txtInputsSize.getText());
+                int outputs = Integer.parseInt(txtOutputsSize.getText());
+                int dataSetSize = Integer.parseInt(txtSize.getText());
                 Transferable t = e.getTransferable();
                 DataFlavor dataFlavor = t.getTransferDataFlavors()[1];                              
                 DataObject dataObject = (DataObject) t.getTransferData(dataFlavor);
@@ -400,22 +464,8 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 NeuralNetwork nnet = dataObject.getLookup().lookup(NeuralNetwork.class);//get the object from lookup listener
                         
                 if (dataSet != null) {
-                    DataSet tset = new DataSet(5,7);
-                    Random r  = new Random();
-                    for (int i = 0; i < 1500; i++) {
-                        double[] inputs = new double[5];
-                        for (int j = 0; j < inputs.length; j++) {
-                            inputs[j]=randInt(-100, 100)/100.0;
-                            
-                        }
-                        double[] outputs = new double[7];
-                        outputs[randInt(0, 6)]=randInt(1, 100);
-                        
-                        DataSetRow dr = new DataSetRow(inputs, outputs);
-                        tset.addRow(dr);
-                        
-                    }
-                    trainingSet = tset;//dataSet;
+                    
+                    trainingSet = generateRandomDataSet(inputs, outputs, dataSetSize);//dataSet;
                     
                     if (radioDataSet.isSelected()) {
                         IOSettingsDialog dataSetSettings = IOSettingsDialog.getInstance();
@@ -426,7 +476,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 }
 
                 if (nnet != null) {
-                    neuralNetwork = nnet;
+                    neuralNetwork = new MultiLayerPerceptron(inputs,10,4,outputs);//nnet;
                 }
 
                 if(neuralNetwork != null && trainingSet != null){
@@ -447,18 +497,34 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
             }
         }
     }
-    public static int randInt(int min, int max) {
+    
+    private static int randInt(int min, int max) {
+        return new Random().nextInt((max - min) + 1) + min;
+    }
+    
+    public DataSet generateRandomDataSet(int inputsNumber, int outputsNumber, int rows) {
+        
+        DataSet dataSet = new DataSet(inputsNumber, outputsNumber);
+        
+        for (int i = 1; i <= rows; i++) {
+            
+            double[] inputs = new double[inputsNumber];
+            
+            for (int j = 0; j < inputs.length; j++) {
+                inputs[j] = randInt(-100, 100) / 100.0;
 
-    // NOTE: Usually this should be a field rather than a method
-    // variable so that it is not re-seeded every call.
-    Random rand = new Random();
+            }
+            
+            double[] outputs = new double[outputsNumber];
+            
+            outputs[randInt(0, outputsNumber-1)] = randInt(1, outputsNumber);
 
-    // nextInt is normally exclusive of the top value,
-    // so add 1 to make it inclusive
-    int randomNum = rand.nextInt((max - min) + 1) + min;
+            dataSet.addRow(new DataSetRow(inputs, outputs));
 
-    return randomNum;
-}
+        }
+        return dataSet;
+    }
+    
     public void initializeProducerConsumer(int queueSize) {
         
         trainSignal = false;

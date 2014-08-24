@@ -26,7 +26,7 @@ public class DataSetConsumer extends Consumer{
         while (true) {
             try {
                 DataSetVisualizationParameters parameters = (DataSetVisualizationParameters) getSharedQueue().take();
-                JMEDatasetScatter3D scatter = new JMEDatasetScatter3D(parameters.getDataSet(), parameters.getInputs(), parameters.getOutputColors(), getJmeVisualization());
+                JMEDatasetScatter3D scatter = new JMEDatasetScatter3D(parameters.getDataSet(), parameters.getInputs(), parameters.getDominantOutputColors(), getJmeVisualization());
                 scatter.createGraph();
             } catch (InterruptedException ex) {
             }

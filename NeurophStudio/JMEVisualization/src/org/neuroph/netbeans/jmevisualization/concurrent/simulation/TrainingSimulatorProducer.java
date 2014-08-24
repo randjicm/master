@@ -63,7 +63,7 @@ public class TrainingSimulatorProducer extends Producer{
 
             }
             
-            parameters.setOutputColors(outputColors);
+            parameters.setDominantOutputColors(outputColors);
 
             getSharedQueue().put(parameters);
         } catch (InterruptedException ex) {
