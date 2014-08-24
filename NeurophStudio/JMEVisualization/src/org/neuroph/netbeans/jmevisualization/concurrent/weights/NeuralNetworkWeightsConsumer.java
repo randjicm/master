@@ -22,11 +22,12 @@ public class NeuralNetworkWeightsConsumer extends Consumer {
    
     @Override
     public void run() {
-        
+        JMEWeightsHistogram3D jmeHistogram3D = new JMEWeightsHistogram3D(getJmeVisualization());
         while (true) {
             try {
                 NeuralNetwork neuralNetwork = (NeuralNetwork) getSharedQueue().take();
-                new JMEWeightsHistogram3D(neuralNetwork, getJmeVisualization()).createGraph();                
+                jmeHistogram3D.setNeuralNetwork(neuralNetwork);
+                jmeHistogram3D.createGraph();
             } catch (InterruptedException ex) {
             }
         }     

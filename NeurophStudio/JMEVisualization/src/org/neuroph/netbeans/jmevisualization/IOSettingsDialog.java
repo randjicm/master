@@ -6,9 +6,11 @@
 package org.neuroph.netbeans.jmevisualization;
 
 import com.jme3.math.ColorRGBA;
+import java.util.ArrayList;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import org.neuroph.core.data.DataSet;
+import org.neuroph.netbeans.jmevisualization.charts.graphs.JMEDatasetScatter3D;
 
 /**
  *
@@ -26,7 +28,9 @@ public class IOSettingsDialog extends javax.swing.JDialog {
     }
 
     private static IOSettingsDialog instance;
-    private ColorRGBA outputColors[];
+    private ArrayList<ColorRGBA> outputColors;
+    private JMEVisualization jmeVisualization;
+    private DataSet dataSet;
 
     public static IOSettingsDialog getInstance() {
         if (instance == null) {
@@ -154,7 +158,7 @@ public class IOSettingsDialog extends javax.swing.JDialog {
             comboZ.setSelectedIndex(0);
         } else {
             storeInputs(new int[]{x, y, z});
-            JOptionPane.showMessageDialog(this, "Settings saved.");
+            drawDataSet();           
             dispose();
         }
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -196,8 +200,9 @@ public class IOSettingsDialog extends javax.swing.JDialog {
         });
     }
 
-    public void initializeInformation(DataSet dataSet) {
-
+    public void initializeInformation(DataSet dataSet, JMEVisualization jmeVisualization) {
+        this.dataSet = dataSet;
+        this.jmeVisualization = jmeVisualization;
         String[] inputNames = new String[dataSet.getInputSize()];
 
         for (int i = 0; i < inputNames.length; i++) {
@@ -210,16 +215,54 @@ public class IOSettingsDialog extends javax.swing.JDialog {
         comboY.setModel(new DefaultComboBoxModel(inputNames));
         comboZ.setModel(new DefaultComboBoxModel(inputNames));
         
-        outputColors = new ColorRGBA[dataSet.getOutputSize()];
-        for (int i = 0; i < outputColors.length; i++) {
-            float r = (i+1)/outputColors.length;
-            float g = 1-(i+1)/outputColors.length;
-            float b = 0.5f;
-            float a = 0.8f;
-            outputColors[i] = new ColorRGBA(r,g,b,a);
+        outputColors = new ArrayList<>(dataSet.getOutputSize());//ColorRGBA[dataSet.getOutputSize()];
+        for (int i = 0; i < dataSet.getOutputSize(); i++) {
+            float r = (i+1)/dataSet.getOutputSize();
+            float g = 1-(i+1)/dataSet.getOutputSize();
+            float b = (i+1)*0.3f;
+            float a = 0.3f;
+            outputColors.add(new ColorRGBA(r,g,b,a));
 
         }
+        
+        
     }
+    
+    private void drawDataSet() {
+        Thread t = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                JMEDatasetScatter3D jmeDataSetScatter = new JMEDatasetScatter3D(dataSet, getStoredInputs(), calculateOutputColors(), jmeVisualization);
+                jmeDataSetScatter.createGraph();
+            }
+        });
+        t.start();
+
+    }
+    
+    public ArrayList<ColorRGBA> calculateOutputColors(){
+        ArrayList<ColorRGBA> colors = new ArrayList<>();
+        
+        for (int i = 0; i < dataSet.size(); i++) {
+            
+            double[] outputValues = dataSet.getRowAt(i).getDesiredOutput();
+            int index = 0;
+            double max = Double.MIN_VALUE;
+            for (int j = 0; j < outputValues.length; j++) {
+                if (Math.abs(outputValues[j]) > max) {
+                    max = outputValues[j];
+                    index = j;
+                }
+
+            }
+            colors.add(getOutputColors().get(index));
+            
+        }
+        return colors;
+    }
+    
+   
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox comboX;
@@ -232,11 +275,11 @@ public class IOSettingsDialog extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 
-    public ColorRGBA[] getOutputColors() {
+    public ArrayList<ColorRGBA> getOutputColors() {
         return outputColors;
     }
 
-    public void setOutputColors(ColorRGBA[] outputColors) {
+    public void setOutputColors(ArrayList<ColorRGBA> outputColors) {
         this.outputColors = outputColors;
     }
 }

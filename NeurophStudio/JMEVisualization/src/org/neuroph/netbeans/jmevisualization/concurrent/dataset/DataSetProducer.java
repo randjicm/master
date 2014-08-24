@@ -68,7 +68,7 @@ public class DataSetProducer extends Producer{
             }           
         }
         
-        return IOSettingsDialog.getInstance().getOutputColors()[index];
+        return IOSettingsDialog.getInstance().getOutputColors().get(index);
         
         
     }

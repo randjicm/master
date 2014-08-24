@@ -84,7 +84,7 @@ public class TrainingSimulatorProducer extends Producer{
             }           
         }
         
-        return IOSettingsDialog.getInstance().getOutputColors()[index];
+        return IOSettingsDialog.getInstance().getOutputColors().get(index);
         
         
     }

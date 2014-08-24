@@ -31,7 +31,7 @@ public class JMEHistogram3DFactory implements Histogram3DFactory<Void, Point3D.F
     public Void createHistogram3D(Point3D.Float[] points, Histogram3DProperties prop) {
 
         Beans.setDesignTime(false);
-        jmeVisualization.detachAllChildrenFromAnotherThread();
+        jmeVisualization.detachAllChildren();
         jmeVisualization.attachCoordinateSystem(1, 10);
         Vector3f[] data = new Vector3f[points.length];
         float maxZ = 0;
@@ -57,7 +57,7 @@ public class JMEHistogram3DFactory implements Histogram3DFactory<Void, Point3D.F
             cylinderGeometry.setMaterial(m);
             cylinderGeometry.move(data[i].x * 20, data[i].y * 5, barHeight/2);
             
-            jmeVisualization.attachChildFromAnotherThread(cylinderGeometry);
+            jmeVisualization.attachChild(cylinderGeometry);
             
         }
         

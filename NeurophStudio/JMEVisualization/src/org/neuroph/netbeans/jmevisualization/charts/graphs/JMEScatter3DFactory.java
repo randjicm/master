@@ -23,12 +23,11 @@ public class JMEScatter3DFactory implements Scatter3DFactory<Void, Point3D.Float
 
     public JMEScatter3DFactory(JMEVisualization jmeVisualization) {
         this.jmeVisualization = jmeVisualization;
-        //initializeObjects();
     }
     
     public void initializeObjects(Point3D.Float[] points, Scatter3DProperties prop){
         Beans.setDesignTime(false);  
-        jmeVisualization.detachAllChildrenFromAnotherThread();
+        jmeVisualization.detachAllChildren();
         jmeVisualization.attachCoordinateSystem(1, 10);
         
         Vector3f[] data = new Vector3f[points.length];     
@@ -43,7 +42,7 @@ public class JMEScatter3DFactory implements Scatter3DFactory<Void, Point3D.Float
             sphereGeometry.setMaterial(m);
             sphereGeometry.move(data[i].x*100, data[i].y*100, data[i].z*100);
         
-            jmeVisualization.attachChildFromAnotherThread(sphereGeometry);
+            jmeVisualization.attachChild(sphereGeometry);
         }
     }
     
@@ -51,15 +50,37 @@ public class JMEScatter3DFactory implements Scatter3DFactory<Void, Point3D.Float
     @Override
     public Void createScatter3D(Point3D.Float[] points, Scatter3DProperties prop) {
         
+//        Beans.setDesignTime(false);  
+//            
+//        for (int i = 0; i < points.length; i++) {
+//            Geometry sphere = jmeVisualization.getChild("sphere " + i);
+//            ColorRGBA color = prop.getoutputColors().get(i);
+//            sphere.getMaterial().setColor("Color", color );
+//            //jmeVisualization.updateGeometry(sphere);
+//        }
+//        jmeVisualization.update();
+////        jmeVisualization.updateModelBound();           
         Beans.setDesignTime(false);  
-            
-        for (int i = 0; i < points.length; i++) {
-            Material m = new Material(jmeVisualization.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-            m.setColor("Color",  prop.getoutputColors().get(i));
-            jmeVisualization.getChild("sphere " + i).setMaterial(m);
+        jmeVisualization.detachAllChildren();
+        jmeVisualization.attachCoordinateSystem(1, 10);
+        
+        Vector3f[] data = new Vector3f[points.length];     
+        for (int i = 0; i < points.length; i++) {           
+            data[i] = new Vector3f(points[i].getX(), points[i].getY(), points[i].getZ());              
         }
-        jmeVisualization.updateModelBound();
-                         
+               
+        Sphere sphere = new Sphere(32, 32, prop.getDotSize());
+        for (int i = 0; i < points.length; i++) {
+            Geometry sphereGeometry = new Geometry("sphere " + i, sphere);
+            Material m = new Material(jmeVisualization.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+            m.setColor("Color", prop.getoutputColors().get(i));
+            sphereGeometry.setMaterial(m);
+            
+            sphereGeometry.move(data[i].x*100, data[i].y*100, data[i].z*100);
+        
+            jmeVisualization.attachChild(sphereGeometry);
+        }
+        
         return null;
     }
 

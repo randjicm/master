@@ -7,7 +7,6 @@ package org.neuroph.netbeans.jmevisualization;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Spatial;
 import com.jme3.scene.control.UpdateControl;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
@@ -30,8 +29,8 @@ public class JMEVisualization extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        rootNode.addControl(new UpdateControl());
-        rootNode.rotate(1.57f, 0, 3.14f);
+        rootNode.addControl(new UpdateControl());      
+        //rootNode.rotate(1.57f, 0, 3.14f);
         flyCam.setDragToRotate(true);
         flyCam.setEnabled(true);
         flyCam.setMoveSpeed(150);
@@ -62,7 +61,7 @@ public class JMEVisualization extends SimpleApplication {
         this.startCanvas();
     }
 
-    public void attachChildFromAnotherThread(final Geometry geometry) {
+    public void attachChild(final Geometry geometry) {
         rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
 
             @Override
@@ -75,7 +74,7 @@ public class JMEVisualization extends SimpleApplication {
         });
     }
 
-    public void detachAllChildrenFromAnotherThread() {
+    public void detachAllChildren() {
 
         rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
 
@@ -117,13 +116,13 @@ public class JMEVisualization extends SimpleApplication {
         });
     }
 
-    public Spatial getChild(final String name) {
+    public Geometry getChild(final String name) {
         try {
-            return rootNode.getControl(UpdateControl.class).enqueue(new Callable<Spatial>() {
+            return rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
                 
                 @Override
-                public Spatial call() throws Exception {
-                    Spatial s = rootNode.getChild(name);
+                public Geometry call() throws Exception {
+                    Geometry s = (Geometry) rootNode.getChild(name);
                     return s;
                     
                 }
@@ -133,6 +132,34 @@ public class JMEVisualization extends SimpleApplication {
         }
         return null;
     }
+    
+    public void updateGeometry(final Geometry geometry){
+        rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
+
+            @Override
+            public Geometry call() throws Exception {
+                geometry.updateModelBound();
+                return null;
+            }
+        });
+    }
+    
+//    public Spatial rotateRootNode(final float xAngle, final float yAngle, final float zAngle){
+//        try {
+//            return rootNode.getControl(UpdateControl.class).enqueue(new Callable<Spatial>() {
+//                
+//                @Override
+//                public Spatial call() throws Exception {
+//                    
+//                    return rootNode.rotate(xAngle, yAngle, zAngle);
+//                }
+//            }).get();
+//        } catch (InterruptedException | ExecutionException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
+//        return null;
+//    }
+//    
 
     public int getWidth() {
         return width;
