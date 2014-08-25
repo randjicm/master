@@ -8,6 +8,8 @@ public class Histogram3DProperties extends Chart3DProperties {
 
     private float radius = 0.35f;
     private int maxBarsSize;
+    private int numberOfBarRows;
+    
     public Histogram3DProperties() {
     }
     
@@ -40,5 +42,13 @@ public class Histogram3DProperties extends Chart3DProperties {
 
     public void setMaxBarsSize(int maxBarsSize) {
         this.maxBarsSize = maxBarsSize;
+    }
+
+    public int getNumberOfBarRows() {
+        return numberOfBarRows;
+    }
+
+    public void setNumberOfBarRows(int numberOfBarRows) {
+        this.numberOfBarRows = numberOfBarRows;
     }
 }
