@@ -13,8 +13,6 @@ import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 import java.awt.Dimension;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import org.openide.util.Exceptions;
 
 /**
  * JME based Visualization Component
@@ -134,45 +132,45 @@ public class JMEVisualization extends SimpleApplication {
 
     }
 
-    public void updateModelBound() {
-        rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
-
-            @Override
-            public Geometry call() throws Exception {
-
-                rootNode.updateModelBound();
-                return null;
-            }
-        });
-    }
-
-    public Geometry getChild(final String name) {
-        try {
-            return rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
-
-                @Override
-                public Geometry call() throws Exception {
-                    Geometry s = (Geometry) rootNode.getChild(name);
-                    return s;
-
-                }
-            }).get();
-        } catch (InterruptedException | ExecutionException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        return null;
-    }
-
-    public void updateGeometry(final Geometry geometry) {
-        rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
-
-            @Override
-            public Geometry call() throws Exception {
-                geometry.updateModelBound();
-                return null;
-            }
-        });
-    }
+//    public void updateModelBound() {
+//        rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
+//
+//            @Override
+//            public Geometry call() throws Exception {
+//
+//                rootNode.updateModelBound();
+//                return null;
+//            }
+//        });
+//    }
+//
+//    public Geometry getChild(final String name) {
+//        try {
+//            return rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
+//
+//                @Override
+//                public Geometry call() throws Exception {
+//                    Geometry s = (Geometry) rootNode.getChild(name);
+//                    return s;
+//
+//                }
+//            }).get();
+//        } catch (InterruptedException | ExecutionException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
+//        return null;
+//    }
+//
+//    public void updateGeometry(final Geometry geometry) {
+//        rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
+//
+//            @Override
+//            public Geometry call() throws Exception {
+//                geometry.updateModelBound();
+//                return null;
+//            }
+//        });
+//    }
 
     public int getWidth() {
         return width;

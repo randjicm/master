@@ -49,12 +49,16 @@ public class JMEHistogram3DFactory implements Histogram3DFactory<Void, Point3D.F
             final Geometry cylinderGeometry = new Geometry("cylinder " + i, new Cylinder(32, 32, prop.getRadius(), barHeight, true));
             Material m = new Material(jmeVisualization.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
             
-            if (data[i].z >= 0) {
+            if (data[i].z > 0) {
                 m.setColor("Color", ColorRGBA.Red);
-            } else {
+            }
+            if(data[i].z == 0){
+                m.setColor("Color", ColorRGBA.White);
+            }
+            if(data[i].z < 0){
                 m.setColor("Color", ColorRGBA.Blue);
             }
-            
+
             cylinderGeometry.setMaterial(m);
             cylinderGeometry.move(data[i].x * 20, data[i].y * 5, barHeight/2);
             
