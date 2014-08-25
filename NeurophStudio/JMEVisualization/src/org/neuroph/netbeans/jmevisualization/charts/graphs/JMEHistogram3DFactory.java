@@ -32,21 +32,20 @@ public class JMEHistogram3DFactory implements Histogram3DFactory<Void, Point3D.F
 
         Beans.setDesignTime(false);
         jmeVisualization.detachAllChildren();
-        //jmeVisualization.attachCoordinateSystem(1, 10);
-        jmeVisualization.attachHistoramGrid(prop.getMaxBarsSize());
+        jmeVisualization.attachHistoramGrid(prop.getMaxBarsSize(),prop.getNumberOfBarRows());
         Vector3f[] data = new Vector3f[points.length];
         
         float maxZ = 0;
         for (int i = 1; i < points.length; i++) {
             data[i] = new Vector3f(points[i].getX(), points[i].getY(), points[i].getZ());
             if (Math.abs(data[i].getZ()) > maxZ) {
-                maxZ = data[i].getZ();
+                maxZ = Math.abs(data[i].getZ());
             }
         }
 
         for (int i = 1; i < points.length; i++) {
             //x-layers count, y-connections count, z-weight value
-            float barHeight = data[i].z * 100 / maxZ;
+            float barHeight = (data[i].z/maxZ) * 100;
             final Geometry cylinderGeometry = new Geometry("cylinder " + i, new Cylinder(32, 32, prop.getRadius(), barHeight, true));
             Material m = new Material(jmeVisualization.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
             

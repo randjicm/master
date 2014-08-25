@@ -476,7 +476,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 }
 
                 if (nnet != null) {
-                    neuralNetwork = new MultiLayerPerceptron(inputs,10,4,outputs);//nnet;
+                    neuralNetwork = new MultiLayerPerceptron(inputs,4,outputs);//nnet;
                 }
 
                 if(neuralNetwork != null && trainingSet != null){

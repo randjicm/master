@@ -35,7 +35,7 @@ public class JMEWeightsHistogram3D extends Graph3DBuilder<Void, Point3D.Float>{
     public JMEWeightsHistogram3D(JMEVisualization jmeVisualization) {
         super();       
         this.jmeVisualization = jmeVisualization;
-        this.jmeVisualization.getRootNode().rotate(1.57f, 0, 3.14f);
+        this.jmeVisualization.getRootNode().rotate(-1.57f, -1.57f, 0.0f);
     }
 
     public NeuralNetwork getNeuralNetwork() {
@@ -80,9 +80,9 @@ public class JMEWeightsHistogram3D extends Graph3DBuilder<Void, Point3D.Float>{
                 maxBarsSize = l.getNeuronsCount();
             }
         }
-        
-        prop.setMaxBarsSize(maxBarsSize);   
         prop.setRadius(2f);
+        prop.setMaxBarsSize(maxBarsSize);          
+        prop.setNumberOfBarRows(neuralNetwork.getLayersCount());
         jmeHistogramFactory.createHistogram3D(points3D, prop);
         
         jmeVisualization.getJmeCanvasContext().getCanvas().requestFocus();

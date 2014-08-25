@@ -30,11 +30,10 @@ public class JMEVisualization extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        rootNode.addControl(new UpdateControl());      
-        //rootNode.rotate(1.57f, 0, 3.14f);
+        rootNode.addControl(new UpdateControl());
         flyCam.setDragToRotate(true);
         flyCam.setEnabled(true);
-        flyCam.setMoveSpeed(150);
+        flyCam.setMoveSpeed(200);
         flyCam.setZoomSpeed(10);
     }
 
@@ -104,20 +103,25 @@ public class JMEVisualization extends SimpleApplication {
             }
         });
     }
-    
-    public void attachHistoramGrid(final int maxBarsLength) {
+
+    public void attachHistoramGrid(final int maxBarsLength, final int numberOfBarRows) {
         rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
 
             @Override
             public Geometry call() throws Exception {
-                Geometry xPlane = new Geometry("xPlane", new Grid(maxBarsLength, 10, 10));
-                Geometry yPlane = (Geometry) new Geometry("yPlane", new Grid(10, 10, 10)).rotate(1.57f, 0, 0);
-                Geometry zPlane = (Geometry) new Geometry("zPlane", new Grid(10, 10, 10)).rotate(0, 0, 1.57f);
+
+                Geometry xPlane = (Geometry) new Geometry("xPlane", new Grid(maxBarsLength * (numberOfBarRows + 1) + 2, (numberOfBarRows) * 5 - 3, 5)).rotate(-1.57f, 0, 0);
+                Geometry yPlane = (Geometry) new Geometry("yPlane", new Grid(maxBarsLength * (numberOfBarRows + 1) + 2, 40, 5)).rotate(-1.57f, -1.57f, 0);
+                Geometry zPlane = (Geometry) new Geometry("zPlane", new Grid(40, (numberOfBarRows) * 5 - 3, 5)).rotate(0, 0, 0);
+
                 Material m = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
                 xPlane.setMaterial(m);
                 yPlane.setMaterial(m);
                 zPlane.setMaterial(m);
-                xPlane.move(50, 0, 50);
+
+                yPlane.move(0, 0, -100);
+                zPlane.move(0, 0, -100);
+
                 rootNode.attachChild(xPlane);
                 rootNode.attachChild(yPlane);
                 rootNode.attachChild(zPlane);
@@ -145,12 +149,12 @@ public class JMEVisualization extends SimpleApplication {
     public Geometry getChild(final String name) {
         try {
             return rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
-                
+
                 @Override
                 public Geometry call() throws Exception {
                     Geometry s = (Geometry) rootNode.getChild(name);
                     return s;
-                    
+
                 }
             }).get();
         } catch (InterruptedException | ExecutionException ex) {
@@ -158,8 +162,8 @@ public class JMEVisualization extends SimpleApplication {
         }
         return null;
     }
-    
-    public void updateGeometry(final Geometry geometry){
+
+    public void updateGeometry(final Geometry geometry) {
         rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
 
             @Override
@@ -169,7 +173,6 @@ public class JMEVisualization extends SimpleApplication {
             }
         });
     }
-    
 
     public int getWidth() {
         return width;
