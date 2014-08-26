@@ -12,6 +12,7 @@ import java.util.Random;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import org.neuroph.core.data.DataSet;
+import org.neuroph.netbeans.jmevisualization.charts.JMEVisualizationTopComponent;
 import org.neuroph.netbeans.jmevisualization.charts.graphs.JMEDatasetScatter3D;
 
 /**
@@ -68,16 +69,27 @@ public class IOSettingsDialog extends javax.swing.JDialog {
 
         inputNames = new String[dataSet.getInputSize()];
         outputNames = new String[dataSet.getOutputSize()];
-        
-        
+        String[] columnNames = dataSet.getColumnNames();
+        int columnIndex = 0;
         for (int i = 0; i < inputNames.length; i++) {
             int k = i + 1;
-            inputNames[i] = "Input " + k;
+            if (columnNames[columnIndex] == null) {
+                inputNames[i] = "Input " + k;
+            } else {
+                inputNames[i] = columnNames[columnIndex];
+            }
+            columnIndex++;
         }
-        
+        //int columnIndex = columnNames.length-dataSet.getOutputSize();
         for (int i = 0; i < outputNames.length; i++) {
             int k = i + 1;
-            outputNames[i] = "Output " + k;
+            if(columnNames[columnIndex]==null){
+                outputNames[i] = "Output " + k;
+            }else{
+                outputNames[i] = columnNames[columnIndex];
+            }
+            columnIndex++;
+            
         }
 
         comboX.setModel(new DefaultComboBoxModel(inputNames));
@@ -157,17 +169,25 @@ public class IOSettingsDialog extends javax.swing.JDialog {
         jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle(org.openide.util.NbBundle.getMessage(IOSettingsDialog.class, "IOSettingsDialog.title")); // NOI18N
         setModal(true);
+        setResizable(false);
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(IOSettingsDialog.class, "IOSettingsDialog.jPanel2.border.title"))); // NOI18N
 
+        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(204, 0, 0));
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(IOSettingsDialog.class, "IOSettingsDialog.jLabel1.text")); // NOI18N
 
+        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(0, 204, 51));
         org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(IOSettingsDialog.class, "IOSettingsDialog.jLabel2.text")); // NOI18N
 
+        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(0, 102, 204));
         org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(IOSettingsDialog.class, "IOSettingsDialog.jLabel3.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(IOSettingsDialog.class, "IOSettingsDialog.jButton1.text")); // NOI18N
@@ -280,7 +300,7 @@ public class IOSettingsDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton3)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -290,14 +310,14 @@ public class IOSettingsDialog extends javax.swing.JDialog {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(18, 18, 18)
                         .addComponent(jButton3))
                     .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -308,7 +328,7 @@ public class IOSettingsDialog extends javax.swing.JDialog {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -344,8 +364,9 @@ public class IOSettingsDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-            drawDataSet();
-            dispose();
+        drawDataSet();
+        JMEVisualizationTopComponent.findInstance().loadDataSetLegend();
+        dispose();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
@@ -402,5 +423,21 @@ public class IOSettingsDialog extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     // End of variables declaration//GEN-END:variables
+
+    public String[] getInputNames() {
+        return inputNames;
+    }
+
+    public void setInputNames(String[] inputNames) {
+        this.inputNames = inputNames;
+    }
+
+    public String[] getOutputNames() {
+        return outputNames;
+    }
+
+    public void setOutputNames(String[] outputNames) {
+        this.outputNames = outputNames;
+    }
 
 }
