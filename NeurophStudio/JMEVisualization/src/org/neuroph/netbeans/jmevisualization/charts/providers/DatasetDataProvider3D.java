@@ -56,15 +56,22 @@ public class DatasetDataProvider3D implements DataProvider3D<Point3D.Float>{
         Point3D.Float[] data = new Point3D.Float[numberOfPoints];
         int counter = 0;
         List<DataSetRow> rows = dataSet.getRows();
-        for (int i = 0; i < rows.size(); i++) {
-
-            float x = getValue(rows.get(i), attr[0]);
-            float y = getValue(rows.get(i), attr[1]);
-            float z = getValue(rows.get(i), attr[2]);
-            
+        for (DataSetRow row : rows) {
+            float x = getValue(row, attr[0]);
+            float y = getValue(row, attr[1]);
+            float z = getValue(row, attr[2]);
             data[counter] = new Point3D.Float(x, y, z);
             counter++;
         }
+//        for (int i = 0; i < rows.size(); i++) {
+//
+//            float x = getValue(rows.get(i), attr[0]);
+//            float y = getValue(rows.get(i), attr[1]);
+//            float z = getValue(rows.get(i), attr[2]);
+//            
+//            data[counter] = new Point3D.Float(x, y, z);
+//            counter++;
+//        }
 
         return data;
     }

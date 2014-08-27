@@ -17,20 +17,18 @@ import org.neuroph.core.data.DataSet;
 public class DataSetVisualizationParameters {
        
     
-    private DataSet dataSet;
-    
-    private int[] inputs;
-    
-    private ArrayList<ColorRGBA> dominantOutputColors;
+    private DataSet dataSet;    
+    private int[] inputs;//indexes of 3 chosen inputs   
+    private ArrayList<ColorRGBA> dominantOutputColors;//calculated output colors for each dataSet row during training iteration
 
     public DataSetVisualizationParameters(DataSet dataSet, int[] inputs, ArrayList<ColorRGBA> dominantOutputColors) {
         this.dataSet = dataSet;
         this.inputs = inputs;
         this.dominantOutputColors = dominantOutputColors;
     }
-
     
     public DataSetVisualizationParameters() {
+        
     }
     
     public DataSet getDataSet() {
@@ -56,17 +54,5 @@ public class DataSetVisualizationParameters {
     public void setInputs(int[] inputs) {
         this.inputs = inputs;
     }
-    
-    
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 }

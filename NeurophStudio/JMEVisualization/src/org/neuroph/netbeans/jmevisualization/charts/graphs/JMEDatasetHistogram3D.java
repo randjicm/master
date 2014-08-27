@@ -40,6 +40,10 @@ public class JMEDatasetHistogram3D extends Graph3DBuilder<Void, Point3D.Float>{
         return "Histogram";
     }
 
+    /**
+     * Creates graph for defined attributes.
+     * @return 
+     */
     @Override
     public Void createGraph() {
         setAttribute1(new Attribute(0, false, "Attribute"));

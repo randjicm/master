@@ -29,7 +29,7 @@ public class WeightsDataProvider3D implements DataProvider3D<Point3D.Float>{
 
     @Override
     public Point3D.Float[] getData(Attribute... a) {
-        //Ne treba mu atribut
+        
         if (nnet == null) {
             throw new RuntimeException("No neural network.");
         }

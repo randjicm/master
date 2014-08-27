@@ -17,8 +17,6 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.neuroph.core.NeuralNetwork;
@@ -77,28 +75,33 @@ import org.openide.windows.WindowManager;
     "CTL_JMEVisualizationTopComponent=JMEVisualization Window",
     "HINT_JMEVisualizationTopComponent=This is a JMEVisualization window"
 })
-public final class JMEVisualizationTopComponent extends TopComponent implements LearningEventListener{
-    
+public final class JMEVisualizationTopComponent extends TopComponent implements LearningEventListener {
+
     private static JMEVisualizationTopComponent instance;
     private static final String PREFERRED_ID = "JMEVisualizationTopComponent";
-    private InstanceContent content;
-    private AbstractLookup aLookup;
-    private DropTargetListener dtListener;
-    private DropTarget dropTarget;
-    private int acceptableActions = DnDConstants.ACTION_COPY;
+
+    private final InstanceContent content;
+    private final AbstractLookup aLookup;
+    private final DropTargetListener dtListener;
+    private final int acceptableActions = DnDConstants.ACTION_COPY;
+    private final DropTarget dropTarget;
+    //private Thread firstCalculation = null;
+
     private NeuralNetwork neuralNetwork;
     private DataSet trainingSet;
     private NeuralNetAndDataSet neuralNetAndDataSet;
     private TrainingController trainingController;
-    private Thread firstCalculation = null;
-    private int iterationCounter = 1;
+
     private ProducerConsumer producerConsumer;
+    private Producer producer;
+    private Consumer consumer;
+
     private java.awt.Canvas jmeCanvas;
     private JMEVisualization jmeVisualization;
+
+    private int iterationCounter = 1;
     private boolean trainSignal = false;
-    private Consumer consumer;
-    private Producer producer;
-    
+
     private JMEVisualizationTopComponent() {
         initComponents();
         setName(Bundle.CTL_JMEVisualizationTopComponent());
@@ -112,25 +115,27 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 this.dtListener,
                 true);
     }
-    
+
     /**
      * Gets default instance. Do not use directly: reserved for *.settings files
      * only, i.e. deserialization routines; otherwise you could get a
      * non-deserialized instance. To obtain the singleton instance, use
      * {@link #findInstance}.
-     * @return 
+     *
+     * @return
      */
-    public static synchronized JMEVisualizationTopComponent getDefault() {
+    private static synchronized JMEVisualizationTopComponent getDefault() {
         if (instance == null) {
             instance = new JMEVisualizationTopComponent();
         }
         return instance;
     }
-    
+
     /**
      * Obtain the MultiLayerPerceptronClassificationSampleTopComponent instance.
      * Never call {@link #getDefault} directly!
-     * @return 
+     *
+     * @return
      */
     public static synchronized JMEVisualizationTopComponent findInstance() {
         TopComponent win = WindowManager.getDefault().findTopComponent(PREFERRED_ID);
@@ -147,7 +152,23 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 + "' ID. That is a potential source of errors and unexpected behavior.");
         return getDefault();
     }
-    
+
+    public java.awt.Canvas getJmeCanvas() {
+        return jmeCanvas;
+    }
+
+    public void setJmeCanvas(java.awt.Canvas jmeCanvas) {
+        this.jmeCanvas = jmeCanvas;
+    }
+
+    public boolean isTrainSignal() {
+        return trainSignal;
+    }
+
+    public void setTrainSignal(boolean trainSignal) {
+        this.trainSignal = trainSignal;
+    }
+
     @Override
     public Lookup getLookup() {
         return new ProxyLookup(new Lookup[]{
@@ -155,18 +176,287 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
             aLookup
         });
     }
-    
+
+    /**
+     * At each 10nth iteration, neural network is used for collecting training
+     * data(producing), and sending collected data for drawing (consuming)
+     *
+     * @param le
+     */
     @Override
     public void handleLearningEvent(LearningEvent le) {
-        
         iterationCounter++;
-        
         if (iterationCounter % 10 == 0) {
             producerConsumer.startProducing();
         }
-        
     }
-    
+
+    /**
+     * When topComponent opens, initialization process starts
+     */
+    @Override
+    public void componentOpened() {
+
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+
+                /*
+                 Create and start JMEVisualization instance
+                 */
+                jmeVisualization = new JMEVisualization();
+                jmeVisualization.setWidth(getVisualizationPanel().getWidth() - 15);
+                jmeVisualization.setHeight(getVisualizationPanel().getHeight() - 30);
+                jmeVisualization.startApplication();
+
+                /*
+                 Fetch Canvas from JMEVisualization instance
+                 */
+                jmeCanvas = jmeVisualization.getJmeCanvasContext().getCanvas();
+
+                getVisualizationPanel().setLayout(new FlowLayout());
+                getVisualizationPanel().add(jmeCanvas);
+                getVisualizationPanel().revalidate();
+
+            }
+        });
+    }
+    /*
+     When topComponent closes, deinitialization starts
+     */
+
+    @Override
+    public void componentClosed() {
+        /*
+         Stop JMEVisualization instance and remove jmeCanvas from panel
+         */
+        jmeVisualization.stop();
+        getVisualizationPanel().remove(jmeCanvas);
+        getVisualizationPanel().revalidate();
+    }
+
+    void writeProperties(java.util.Properties p) {
+        // better to version settings since initial version as advocated at
+        // http://wiki.apidesign.org/wiki/PropertyFiles
+        p.setProperty("version", "1.0");
+        // TODO store your settings
+    }
+
+    void readProperties(java.util.Properties p) {
+        String version = p.getProperty("version");
+        // TODO read your settings according to their version
+    }
+
+    public JPanel getVisualizationPanel() {
+        return visualizationPanel;
+    }
+
+    /**
+     * Removes neuralNetwork, dataSet and trainingController from content
+     */
+    public void removeContent() {
+        try {
+            content.remove(neuralNetAndDataSet);
+            content.remove(trainingController);
+            JMEVisualizationTopComponent.this.requestActive();
+        } catch (Exception ex) {
+        }
+    }
+
+    /**
+     * Adds neuralNetwork, dataSet and trainingController to content
+     */
+    public void addContent() {
+        content.add(neuralNetAndDataSet);
+        content.add(trainingController);
+        JMEVisualizationTopComponent.this.requestActive();
+    }
+
+    /**
+     * @param min
+     * @param max
+     * @return Random integer between min and max value (inclusive)
+     */
+    private static int randInt(int min, int max) {
+        return new Random().nextInt((max - min) + 1) + min;
+    }
+
+    /**
+     * Collects all the information needed for neural network training
+     */
+    public void trainingPreprocessing() {
+        neuralNetAndDataSet = new NeuralNetAndDataSet(neuralNetwork, trainingSet);
+        trainingController = new TrainingController(neuralNetAndDataSet);
+        neuralNetwork.getLearningRule().addListener(this);
+        trainingController.setLmsParams(0.7, 0.01, 0);
+        LMS learningRule = (LMS) this.neuralNetAndDataSet.getNetwork().getLearningRule();
+        if (learningRule instanceof MomentumBackpropagation) {
+            ((MomentumBackpropagation) learningRule).setMomentum(0.2);
+        }
+    }
+
+    /**
+     * Loads essential dataSet information, including: selected inputs for
+     * dataSet visualization, chosen colors for dataSet output visualization.
+     */
+    public void loadDataSetLegend() {
+
+        IOSettingsDialog io = IOSettingsDialog.getInstance();
+        int[] inputs = io.getStoredInputs();
+
+        /*
+         Display input names
+         */
+        labX.setText(io.getInputNames()[inputs[0]]);
+        labY.setText(io.getInputNames()[inputs[1]]);
+        labZ.setText(io.getInputNames()[inputs[2]]);
+
+        String[] outputs = io.getOutputNames();
+        Color[] colors = new Color[io.getOutputColors().size()];
+
+        /*
+         Convert colors from ColorRGBA instance to Color instance
+         */
+        for (int i = 0; i < colors.length; i++) {
+            ColorRGBA cl = io.getOutputColors().get(i);
+            colors[i] = new Color(cl.r, cl.g, cl.b, cl.a);
+        }
+        /*
+         Create model and renderer for colors to display in list view
+         */
+        listColors.setModel(new DefaultComboBoxModel(outputs));
+        listColors.setFont(new Font("Tahoma", Font.BOLD, 11));
+
+        ListRenderer renderer = new ListRenderer(listColors);
+        renderer.setColors(colors);
+        renderer.setStrings(outputs);
+
+        listColors.setCellRenderer(renderer);
+
+    }
+
+    /**
+     * Initialize producer and consumer. Initial check is required, in order to
+     * instantiate proper producer and consumer.
+     *
+     * @param queueSize - size of buffer for objects needed for drawing
+     */
+    public void initializeProducerConsumer(int queueSize) {
+
+        trainSignal = false;
+        if (radioDataSet.isSelected()) {
+            consumer = new DataSetConsumer(jmeVisualization);
+            producer = new DataSetProducer(neuralNetAndDataSet);
+        }
+        if (radioWeights.isSelected()) {
+            consumer = new NeuralNetworkWeightsConsumer(jmeVisualization);
+            producer = new NeuralNetworkWeightsProducer(neuralNetAndDataSet);
+        }
+
+        /*
+         Instantiate producerConsumer and start consuming(drawing)
+         */
+        producerConsumer = new ProducerConsumer(queueSize);
+        producerConsumer.setConsumer(consumer);
+        producerConsumer.setProducer(producer);
+
+        producerConsumer.startConsuming();
+
+    }
+
+    class DTListener implements DropTargetListener {
+
+        @Override
+        public void dragEnter(DropTargetDragEvent dtde) {
+            dtde.acceptDrag(dtde.getDropAction());
+        }
+
+        @Override
+        public void dragExit(DropTargetEvent dte) {
+        }
+
+        @Override
+        public void dragOver(DropTargetDragEvent dtde) {
+            dtde.acceptDrag(dtde.getDropAction());
+        }
+
+        @Override
+        public void dropActionChanged(DropTargetDragEvent dtde) {
+            dtde.acceptDrag(dtde.getDropAction());
+        }
+
+        /**
+         * Drop function used for fetching dropped neural network and dataSets
+         *
+         * @param e
+         */
+        @Override
+        public void drop(DropTargetDropEvent e) {
+            try {
+
+                int inputs = Integer.parseInt(txtInputsSize.getText());
+                int outputs = Integer.parseInt(txtOutputsSize.getText());
+                int dataSetSize = Integer.parseInt(txtSize.getText());
+
+                Transferable t = e.getTransferable();
+                DataFlavor dataFlavor = t.getTransferDataFlavors()[1];
+                DataObject dataObject = (DataObject) t.getTransferData(dataFlavor);
+
+                DataSet dataSet = dataObject.getLookup().lookup(DataSet.class);//get the object from lookup listener
+                NeuralNetwork nnet = dataObject.getLookup().lookup(NeuralNetwork.class);//get the object from lookup listener
+
+                if (dataSet != null) {
+                    trainingSet = generateRandomDataSet(inputs, outputs, dataSetSize);//dataSet;
+
+                    if (radioDataSet.isSelected()) {
+                        IOSettingsDialog dataSetSettings = IOSettingsDialog.getInstance();
+                        dataSetSettings.initializeInformation(trainingSet, jmeVisualization);
+                        dataSetSettings.setVisible(true);
+                    }
+
+                }
+
+                if (nnet != null) {
+                    neuralNetwork = new MultiLayerPerceptron(inputs, 4, outputs);//nnet;
+                }
+
+                if (neuralNetwork != null && trainingSet != null) {
+                    trainSignal = true;
+                    removeContent();
+                    trainingPreprocessing();
+                    addContent();
+                }
+
+                e.dropComplete(true);
+            } catch (UnsupportedFlavorException | IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+    }
+
+    public DataSet generateRandomDataSet(int inputsNumber, int outputsNumber, int rows) {
+
+        DataSet dataSet = new DataSet(inputsNumber, outputsNumber);
+        String[] columnNames = new String[inputsNumber + outputsNumber];
+        for (int i = 0; i < columnNames.length; i++) {
+            int k = i + 1;
+            columnNames[i] = "Sample value " + k;
+
+        }
+        dataSet.setColumnNames(columnNames);
+
+        for (int i = 1; i <= rows; i++) {
+            double[] inputs = new double[inputsNumber];
+            for (int j = 0; j < inputs.length; j++) {
+                inputs[j] = randInt(-100, 100) / 100.0;
+            }
+            double[] outputs = new double[outputsNumber];
+            outputs[randInt(0, outputsNumber - 1)] = randInt(1, outputsNumber);
+            dataSet.addRow(new DataSetRow(inputs, outputs));
+        }
+        return dataSet;
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -402,11 +692,11 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtInputsSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtInputsSizeActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_txtInputsSizeActionPerformed
 
     private void txtSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSizeActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_txtSizeActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -433,285 +723,44 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     private javax.swing.JTextField txtSize;
     private javax.swing.JPanel visualizationPanel;
     // End of variables declaration//GEN-END:variables
-    
-    @Override
-    public void componentOpened() {
 
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-
-                jmeVisualization = new JMEVisualization();
-                jmeVisualization.setWidth(getVisualizationPanel().getWidth() - 15);
-                jmeVisualization.setHeight(getVisualizationPanel().getHeight() - 30);
-                jmeVisualization.startApplication();
-
-                jmeCanvas = jmeVisualization.getJmeCanvasContext().getCanvas();
-
-                getVisualizationPanel().setLayout(new FlowLayout());
-                getVisualizationPanel().add(jmeCanvas);
-                getVisualizationPanel().revalidate();
-
-            }
-        });
-    }
-    
-    @Override
-    public void componentClosed() {
-        jmeVisualization.stop();
-        getVisualizationPanel().remove(jmeCanvas); // proveri da li ovo radi ocekivano!!!!        
-        getVisualizationPanel().revalidate();
-    }
-
-    void writeProperties(java.util.Properties p) {
-        // better to version settings since initial version as advocated at
-        // http://wiki.apidesign.org/wiki/PropertyFiles
-        p.setProperty("version", "1.0");
-        // TODO store your settings
-    }
-
-    void readProperties(java.util.Properties p) {
-        String version = p.getProperty("version");
-        // TODO read your settings according to their version
-    }
-    
-    public JPanel getVisualizationPanel(){
-        return visualizationPanel;
-    }
-
-    public void drawWeightsHistogram(NeuralNetwork neuralNetwork) {
-      JMEWeightsHistogram3D jmeWeightsHistogram3D = new JMEWeightsHistogram3D(neuralNetwork, jmeVisualization);           
-      jmeWeightsHistogram3D.createGraph();
-    }
-    
-    
-    // created demo dataset
-    public DataSet createSphereDataSet() {
-
-        DataSet d = new DataSet(3, 2);
-        Random r = new Random();
-        for (int i = 1; i <= 5000; i++) {
-
-            double x = r.nextGaussian();
-            double y = r.nextGaussian();
-            double z = r.nextGaussian();
-            
-            double c1 = (getCategoryMembership(x, y, z, 0, 0, 0, 1, 1, 1));
-            if ( c1>= 1) {
-                d.addRow(new double[]{x, y, z}, new double[]{1.0, 0.0});
-            } else {
-                d.addRow(new double[]{x, y, z}, new double[]{0.0, 1.0});
-            }
-
-        }
-
-        return d;
-    }    
-    
-    public void drawSampleHistogram() {
-      JMEDatasetHistogram3D jmeDataSetHistogram = new JMEDatasetHistogram3D(createSphereDataSet(), jmeVisualization);           
-      jmeDataSetHistogram.createGraph();
-    }
-    
-    public void drawDataSet(DataSet dataSet) {
-        IOSettingsDialog d = IOSettingsDialog.getInstance();
-        JMEDatasetScatter3D jmeDataSetScatter = new JMEDatasetScatter3D(dataSet, d.getStoredInputs(), d.getOutputColors(), jmeVisualization);
-        jmeDataSetScatter.createGraph();
-    }
-    
-    private double getCategoryMembership(double randomX, double randomY, double randomZ, double x, double y, double z, double a, double b, double c) {
-        return (randomX - x) * (randomX - x) / (a * a) + (randomY - y) * (randomY - y) / (b * b) + (randomZ - z) * (randomZ - z) / (c * c);
-    } 
-
-    public java.awt.Canvas getJmeCanvas() {
-        return jmeCanvas;
-    }
-
-    public void setJmeCanvas(java.awt.Canvas jmeCanvas) {
-        this.jmeCanvas = jmeCanvas;
-    }
-
-    public boolean isTrainSignal() {
-        return trainSignal;
-    }
-
-    public void setTrainSignal(boolean trainSignal) {
-        this.trainSignal = trainSignal;
-    }
-
-    class DTListener implements DropTargetListener {
-
-        @Override
-        public void dragEnter(DropTargetDragEvent dtde) {
-            dtde.acceptDrag(dtde.getDropAction());
-        }
-
-        @Override
-        public void dragExit(DropTargetEvent dte) {
-        }
-
-        @Override
-        public void dragOver(DropTargetDragEvent dtde) {
-            dtde.acceptDrag(dtde.getDropAction());
-        }
-
-        @Override
-        public void dropActionChanged(DropTargetDragEvent dtde) {
-            dtde.acceptDrag(dtde.getDropAction());
-        }
-
-        @Override
-        public void drop(DropTargetDropEvent e) {
-            try {
-                int inputs = Integer.parseInt(txtInputsSize.getText());
-                int outputs = Integer.parseInt(txtOutputsSize.getText());
-                int dataSetSize = Integer.parseInt(txtSize.getText());
-                Transferable t = e.getTransferable();
-                DataFlavor dataFlavor = t.getTransferDataFlavors()[1];                              
-                DataObject dataObject = (DataObject) t.getTransferData(dataFlavor);
-                
-                DataSet dataSet = dataObject.getLookup().lookup(DataSet.class);//get the object from lookup listener
-                NeuralNetwork nnet = dataObject.getLookup().lookup(NeuralNetwork.class);//get the object from lookup listener
-                        
-                if (dataSet != null) {
-                    
-                    trainingSet = generateRandomDataSet(inputs, outputs, dataSetSize);//dataSet;
-                    
-                    if (radioDataSet.isSelected()) {
-                        IOSettingsDialog dataSetSettings = IOSettingsDialog.getInstance();
-                        dataSetSettings.initializeInformation(trainingSet, jmeVisualization);
-                        dataSetSettings.setVisible(true);
-                    }
-
-                }
-
-                if (nnet != null) {
-                    neuralNetwork = new MultiLayerPerceptron(inputs,4,outputs);//nnet;
-                }
-
-                if(neuralNetwork != null && trainingSet != null){
-                    
-                    trainSignal = true;
-                    
-                    removeContent();
-                    trainingPreprocessing();
-                    
-                    addContent();
-                    
-                }
-                
-                e.dropComplete(true);
-            } catch (UnsupportedFlavorException | IOException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        }
-    }
-    
-    private static int randInt(int min, int max) {
-        return new Random().nextInt((max - min) + 1) + min;
-    }
-    
-    public DataSet generateRandomDataSet(int inputsNumber, int outputsNumber, int rows) {
-        
-        DataSet dataSet = new DataSet(inputsNumber, outputsNumber);
-        String[] columnNames = new  String[inputsNumber+outputsNumber];
-        for (int i = 0; i < columnNames.length; i++) {
-            int k = i+1;
-            columnNames[i]= "Sample value " + k;
-            
-        }
-        dataSet.setColumnNames(columnNames);
-        
-        for (int i = 1; i <= rows; i++) {            
-            double[] inputs = new double[inputsNumber];           
-            for (int j = 0; j < inputs.length; j++) {
-                inputs[j] = randInt(-100, 100) / 100.0;
-            }          
-            double[] outputs = new double[outputsNumber];          
-            outputs[randInt(0, outputsNumber-1)] = randInt(1, outputsNumber);
-            dataSet.addRow(new DataSetRow(inputs, outputs));
-        }
-        return dataSet;
-    }
-    
-    public void initializeProducerConsumer(int queueSize) {
-        
-        trainSignal = false;
-        if (radioDataSet.isSelected()) {
-            consumer = new DataSetConsumer(jmeVisualization);
-            producer = new DataSetProducer(neuralNetAndDataSet);
-        }
-        if (radioWeights.isSelected()) {
-            consumer = new NeuralNetworkWeightsConsumer(jmeVisualization);
-            producer = new NeuralNetworkWeightsProducer(neuralNetAndDataSet);
-        }
-
-        producerConsumer = new ProducerConsumer(queueSize);
-        producerConsumer.setConsumer(consumer);
-        producerConsumer.setProducer(producer);
-
-        producerConsumer.startConsuming();
-
-    }
-    
-    /*
-     * Collects all the information needed for neural network training
-     */
-    public void trainingPreprocessing() {
-        neuralNetAndDataSet = new NeuralNetAndDataSet(neuralNetwork, trainingSet);
-        trainingController = new TrainingController(neuralNetAndDataSet);
-        neuralNetwork.getLearningRule().addListener(this);//adds learning rule to observer
-        trainingController.setLmsParams(0.7, 0.01, 0);
-        LMS learningRule = (LMS) this.neuralNetAndDataSet.getNetwork().getLearningRule();
-        if (learningRule instanceof MomentumBackpropagation) {
-            ((MomentumBackpropagation) learningRule).setMomentum(0.2);
-        }
-    }
-    
-    public void removeContent() {
-        try {
-            content.remove(neuralNetAndDataSet);
-            content.remove(trainingController);
-            JMEVisualizationTopComponent.this.requestActive();
-        } catch (Exception ex) {
-        }
-        
-    }
-    
-    public void addContent(){       
-        content.add(neuralNetAndDataSet);
-        content.add(trainingController);
-        JMEVisualizationTopComponent.this.requestActive();
-        
-    }    
-    
-    public void loadDataSetLegend(){
-        IOSettingsDialog io = IOSettingsDialog.getInstance();
-        int[] inputs = io.getStoredInputs();
-        
-        labX.setText(io.getInputNames()[inputs[0]]);
-        labY.setText(io.getInputNames()[inputs[1]]);
-        labZ.setText(io.getInputNames()[inputs[2]]);
-        
-        String[] outputs = io.getOutputNames();
-        Color[] colors = new Color[io.getOutputColors().size()];
-        for (int i = 0; i < colors.length; i++) {
-            
-            ColorRGBA cl = io.getOutputColors().get(i);
-            colors[i] = new  Color(cl.r, cl.g, cl.b, cl.a);
-            
-            
-        }
-        
-        listColors.setModel(new DefaultComboBoxModel(outputs));
-        listColors.setFont(new Font("Tahoma", Font.BOLD, 11));
-   
-        ListRenderer renderer = new ListRenderer(listColors);
-        renderer.setColors(colors);
-        renderer.setStrings(outputs);
-        
-        listColors.setCellRenderer(renderer);
-        
-        
-    }
+//    public void drawWeightsHistogram(NeuralNetwork neuralNetwork) {
+//      JMEWeightsHistogram3D jmeWeightsHistogram3D = new JMEWeightsHistogram3D(neuralNetwork, jmeVisualization);           
+//      jmeWeightsHistogram3D.createGraph();
+//    }
+//    public DataSet createSphereDataSet() {
+//
+//        DataSet d = new DataSet(3, 2);
+//        Random r = new Random();
+//        for (int i = 1; i <= 5000; i++) {
+//
+//            double x = r.nextGaussian();
+//            double y = r.nextGaussian();
+//            double z = r.nextGaussian();
+//            
+//            double c1 = (getCategoryMembership(x, y, z, 0, 0, 0, 1, 1, 1));
+//            if ( c1>= 1) {
+//                d.addRow(new double[]{x, y, z}, new double[]{1.0, 0.0});
+//            } else {
+//                d.addRow(new double[]{x, y, z}, new double[]{0.0, 1.0});
+//            }
+//
+//        }
+//
+//        return d;
+//    }    
+//    public void drawSampleHistogram() {
+//      JMEDatasetHistogram3D jmeDataSetHistogram = new JMEDatasetHistogram3D(createSphereDataSet(), jmeVisualization);           
+//      jmeDataSetHistogram.createGraph();
+//    }
+//    
+//    public void drawDataSet(DataSet dataSet) {
+//        IOSettingsDialog d = IOSettingsDialog.getInstance();
+//        JMEDatasetScatter3D jmeDataSetScatter = new JMEDatasetScatter3D(dataSet, d.getStoredInputs(), d.getOutputColors(), jmeVisualization);
+//        jmeDataSetScatter.createGraph();
+//    }
+//    
+//    private double getCategoryMembership(double randomX, double randomY, double randomZ, double x, double y, double z, double a, double b, double c) {
+//        return (randomX - x) * (randomX - x) / (a * a) + (randomY - y) * (randomY - y) / (b * b) + (randomZ - z) * (randomZ - z) / (c * c);
+//    } 
 }

@@ -20,19 +20,31 @@ public class NeuralNetworkWeightsProducer extends Producer {
     public NeuralNetworkWeightsProducer(NeuralNetAndDataSet neuralNetAndDataSet) {
         super(neuralNetAndDataSet);
     }
-    
+
     @Override
     public void run() {
-
         try {
+            /*
+             Fetch neuralNetwork and dataSet 
+             */
             DataSet dataSet = getNeuralNetAndDataSet().getDataSet();
             NeuralNetwork neuralNetwork = getNeuralNetAndDataSet().getNetwork();
 
+            /*
+             Perform neuralNetwork calculations
+             This process refers to single neuralNetwork training iteration
+             */
             for (DataSetRow dataSetRow : dataSet.getRows()) {
                 neuralNetwork.setInput(dataSetRow.getInput());
                 neuralNetwork.calculate();
             }
+
+            /*
+             Put neuralNetwork into sharedQueue
+             If sharedQueue is full, than producer has to wait until the first free space in sharedQueue appears
+             */
             getSharedQueue().put(getNeuralNetAndDataSet().getNetwork());
+
         } catch (InterruptedException ex) {
 
         }

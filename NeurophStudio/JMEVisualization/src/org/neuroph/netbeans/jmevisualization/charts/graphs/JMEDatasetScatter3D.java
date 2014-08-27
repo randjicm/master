@@ -41,29 +41,6 @@ public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float> {
         this.jmeVisualization = jmeVisualization;
     }
 
-    @Override
-    public Void createGraph() {
-        
-        setAttribute1(new Attribute(inputs[0], false, "Attribute"));
-        setAttribute2(new Attribute(inputs[1], false, "Attribute"));
-        setAttribute3(new Attribute(inputs[2], false, "Attribute"));
-
-        points3D = (Point3D.Float[]) dataProvider3D.getData(attribute1, attribute2, attribute3);
-
-        properties = new Scatter3DProperties();
-        properties.setDotSize(1f);
-        properties.setxAxeLabel(attribute1.getLabel());
-        properties.setyAxeLabel(attribute2.getLabel());
-        properties.setzAxeLabel(attribute3.getLabel());
-        properties.setDominantOutputColors(dominantOutputColors);
-
-        jmeScatterFactory = new JMEScatter3DFactory(jmeVisualization);
-
-        jmeScatterFactory.createScatter3D(points3D, properties);
-
-        return null;
-    }
-
     public int[] getInputs() {
         return inputs;
     }
@@ -99,6 +76,46 @@ public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float> {
     @Override
     public String toString() {
         return "Scatter";
+    }
+
+    /**
+     * Creates graph for chosen inputs
+     *
+     * @return
+     */
+    @Override
+    public Void createGraph() {
+
+        /*
+         Set attributes for chosen inputs
+         */
+        setAttribute1(new Attribute(inputs[0], false, "Attribute"));
+        setAttribute2(new Attribute(inputs[1], false, "Attribute"));
+        setAttribute3(new Attribute(inputs[2], false, "Attribute"));
+
+        /*
+         Get points for chosen attributes
+         */
+        points3D = (Point3D.Float[]) dataProvider3D.getData(attribute1, attribute2, attribute3);
+
+        /*
+         Define properties for scatter graph
+         */
+        properties = new Scatter3DProperties();
+        properties.setDotSize(1f);
+        properties.setxAxeLabel(attribute1.getLabel());
+        properties.setyAxeLabel(attribute2.getLabel());
+        properties.setzAxeLabel(attribute3.getLabel());
+        properties.setPointColors(dominantOutputColors);
+
+        /*
+         Instantiate jmeScatterFactory in order to create graph
+         */
+        jmeScatterFactory = new JMEScatter3DFactory(jmeVisualization);
+        jmeScatterFactory.createScatter3D(points3D, properties);
+        jmeVisualization.getJmeCanvasContext().getCanvas().requestFocus();
+
+        return null;
     }
 
 }

@@ -22,7 +22,7 @@ import org.neuroph.netbeans.jmevisualization.charts.graphs.JMEDatasetScatter3D;
 public class IOSettingsDialog extends javax.swing.JDialog {
 
     private static IOSettingsDialog instance;
-    private ArrayList<ColorRGBA> outputColors;
+    private ArrayList<ColorRGBA> outputColors;//colors for each dataSet output
     private JMEVisualization jmeVisualization;
     private DataSet dataSet;
     private int[] inputs;
@@ -62,6 +62,25 @@ public class IOSettingsDialog extends javax.swing.JDialog {
         this.outputColors = outputColors;
     }
 
+    public String[] getInputNames() {
+        return inputNames;
+    }
+
+    public void setInputNames(String[] inputNames) {
+        this.inputNames = inputNames;
+    }
+
+    public String[] getOutputNames() {
+        return outputNames;
+    }
+
+    public void setOutputNames(String[] outputNames) {
+        this.outputNames = outputNames;
+    }
+
+    /*
+     Initialization of input names and output names
+     */
     public void initializeInformation(DataSet dataSet, JMEVisualization jmeVisualization) {
 
         this.dataSet = dataSet;
@@ -71,68 +90,80 @@ public class IOSettingsDialog extends javax.swing.JDialog {
         outputNames = new String[dataSet.getOutputSize()];
         String[] columnNames = dataSet.getColumnNames();
         int columnIndex = 0;
+
         for (int i = 0; i < inputNames.length; i++) {
             int k = i + 1;
-            if (columnNames[columnIndex] == null) {
-                inputNames[i] = "Input " + k;
+            if (columnNames[columnIndex] == null) {//if columnName does not exist
+                inputNames[i] = "Input " + k;//create automatic input name
             } else {
-                inputNames[i] = columnNames[columnIndex];
+                inputNames[i] = columnNames[columnIndex];//otherwise, fetch columnName drom dataSet
             }
             columnIndex++;
-        }
-        //int columnIndex = columnNames.length-dataSet.getOutputSize();
-        for (int i = 0; i < outputNames.length; i++) {
-            int k = i + 1;
-            if(columnNames[columnIndex]==null){
-                outputNames[i] = "Output " + k;
-            }else{
-                outputNames[i] = columnNames[columnIndex];
-            }
-            columnIndex++;
-            
         }
 
+        for (int i = 0; i < outputNames.length; i++) {
+            int k = i + 1;
+            if (columnNames[columnIndex] == null) {//if columnName does not exist
+                outputNames[i] = "Output " + k;//create automatic output name
+            } else {
+                outputNames[i] = columnNames[columnIndex];//otherwise, fetch columnName drom dataSet
+            }
+            columnIndex++;
+
+        }
+
+        outputColors = new ArrayList<>(dataSet.getOutputSize());//create new list
+
+        for (int i = 0; i < dataSet.getOutputSize(); i++) {//assign initial colors
+            outputColors.add(new ColorRGBA(0, 0, 0, 0));
+        }
+        /*
+         Set comboBoxModel for each axis {X, Y, Z}, and outputs
+         */
         comboX.setModel(new DefaultComboBoxModel(inputNames));
         comboY.setModel(new DefaultComboBoxModel(inputNames));
         comboZ.setModel(new DefaultComboBoxModel(inputNames));
-        
         comboOutputs.setModel(new DefaultComboBoxModel(outputNames));
 
-        outputColors = new ArrayList<>(dataSet.getOutputSize());
-
-        for (int i = 0; i < dataSet.getOutputSize(); i++) {
-            outputColors.add(new ColorRGBA(0, 0, 0, 0));
-        }
-
-        
     }
-
+    
+    /*
+     Calculates dominant output color for each dataSet row
+     */
     public ArrayList<ColorRGBA> calculateDominantOutputColors() {
 
         ArrayList<ColorRGBA> colors = new ArrayList<>();
 
         for (int i = 0; i < dataSet.size(); i++) {
-            double[] outputValues = dataSet.getRowAt(i).getDesiredOutput();
-            int index = 0;
+            double[] outputValues = dataSet.getRowAt(i).getDesiredOutput();//fetch dataSet row outputs
+            int index = 0;//index of found dominant color
             double max = Double.MIN_VALUE;
-            for (int j = 0; j < outputValues.length; j++) {
+            /*
+             Output is considered as dominant in case when it possesses maximum absolute value
+             */
+            for (int j = 0; j < outputValues.length; j++) {//find dominant output color
                 if (Math.abs(outputValues[j]) > max) {
                     max = outputValues[j];
                     index = j;
                 }
             }
-            colors.add(outputColors.get(index));
+            colors.add(outputColors.get(index));//fetching dominant output color from the list of base colors
         }
         return colors;
     }
 
-    private static int randInt(int min, int max) {
+    /*
+     Calculates random integer number in specified interval
+     */
+    private static int randInt(int min, int max) {       
         return new Random().nextInt((max - min) + 1) + min;
     }
 
+    /*
+     Draws created dataset
+     */
     private void drawDataSet() {
-        Thread t = new Thread(new Runnable() {
-
+        Thread t = new Thread(new Runnable() {//drawing in a separate thread
             @Override
             public void run() {
                 JMEDatasetScatter3D jmeDataSetScatter = new JMEDatasetScatter3D(dataSet, getStoredInputs(), calculateDominantOutputColors(), jmeVisualization);
@@ -140,7 +171,6 @@ public class IOSettingsDialog extends javax.swing.JDialog {
             }
         });
         t.start();
-
     }
 
     /**
@@ -336,9 +366,9 @@ public class IOSettingsDialog extends javax.swing.JDialog {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 
-        int x = comboX.getSelectedIndex();
-        int y = comboY.getSelectedIndex();
-        int z = comboZ.getSelectedIndex();
+        int x = comboX.getSelectedIndex();//index of first input
+        int y = comboY.getSelectedIndex();//index of secont input
+        int z = comboZ.getSelectedIndex();//index of third input
 
         if (x == y || x == z || y == z) {
             JOptionPane.showMessageDialog(this, "Please select different inputs.");
@@ -346,27 +376,30 @@ public class IOSettingsDialog extends javax.swing.JDialog {
             comboY.setSelectedIndex(0);
             comboZ.setSelectedIndex(0);
         } else {
-            storeInputs(new int[]{x, y, z});
+            storeInputs(new int[]{x, y, z});//saving chosen inputs indexes in array
             JOptionPane.showMessageDialog(this, "Inputs saved.");
 
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-              
-        int index = comboOutputs.getSelectedIndex();
-        Color outputColor = colorChooser.getColor();
-        ColorRGBA outputColorRGBA = outputColors.get(index);
-        outputColorRGBA.set(outputColor.getRed()/255.0f, outputColor.getGreen()/255.0f, outputColor.getBlue()/255.0f, outputColor.getAlpha()/255.0f);
-        
+
+        int index = comboOutputs.getSelectedIndex();//index of selected output
+        Color outputColor = colorChooser.getColor();//fetching selected color from colorChooser
+        ColorRGBA outputColorRGBA = outputColors.get(index);//fetching colorRGBA object for editing
+        outputColorRGBA.set(outputColor.getRed() / 255.0f,
+                outputColor.getGreen() / 255.0f,
+                outputColor.getBlue() / 255.0f,
+                outputColor.getAlpha() / 255.0f);//updating output color
+
         JOptionPane.showMessageDialog(this, "Color is set for " + outputNames[index] + ".");
-        
+
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        drawDataSet();
-        JMEVisualizationTopComponent.findInstance().loadDataSetLegend();
-        dispose();
+        drawDataSet();//drawing dataSet
+        JMEVisualizationTopComponent.findInstance().loadDataSetLegend();//updating dataSetLegend
+        dispose();//closing dialog
     }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
@@ -423,21 +456,5 @@ public class IOSettingsDialog extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     // End of variables declaration//GEN-END:variables
-
-    public String[] getInputNames() {
-        return inputNames;
-    }
-
-    public void setInputNames(String[] inputNames) {
-        this.inputNames = inputNames;
-    }
-
-    public String[] getOutputNames() {
-        return outputNames;
-    }
-
-    public void setOutputNames(String[] outputNames) {
-        this.outputNames = outputNames;
-    }
 
 }

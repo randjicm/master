@@ -26,25 +26,44 @@ public class JMEScatter3DFactory implements Scatter3DFactory<Void, Point3D.Float
 
     @Override
     public Void createScatter3D(Point3D.Float[] points, Scatter3DProperties prop) {
-         
+        
+        /*
+        Perform initial steps for scatter creation
+        */
         Beans.setDesignTime(false);  
         jmeVisualization.detachAllChildren();
-        jmeVisualization.attachCoordinateSystem(1, 10);
+        jmeVisualization.attachCoordinateSystem(1, 10);       
+        Vector3f[] data = new Vector3f[points.length];
         
-        Vector3f[] data = new Vector3f[points.length];     
+        /*
+        Create vectors
+        */
         for (int i = 0; i < points.length; i++) {           
             data[i] = new Vector3f(points[i].getX(), points[i].getY(), points[i].getZ());              
         }
                
+        /*
+        Create spheres
+        */
         Sphere sphere = new Sphere(32, 32, prop.getDotSize());
         for (int i = 0; i < points.length; i++) {
+            
+            /*
+            Instantiate sphereGeometry
+            Instantiate material
+            Assign appropriate point color
+            */
             Geometry sphereGeometry = new Geometry("sphere " + i, sphere);
             Material m = new Material(jmeVisualization.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-            m.setColor("Color", prop.getDominantOutputColors().get(i));
-            sphereGeometry.setMaterial(m);
+            m.setColor("Color", prop.getPointColors().get(i));
             
-            sphereGeometry.move(data[i].x*100, data[i].y*100, data[i].z*100);
-        
+            /*
+            Set appropriate material
+            Place point to appropriate location
+            Attach point to scene graph
+            */
+            sphereGeometry.setMaterial(m);           
+            sphereGeometry.move(data[i].x*100, data[i].y*100, data[i].z*100);        
             jmeVisualization.attachChild(sphereGeometry);
         }
         

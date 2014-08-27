@@ -19,17 +19,31 @@ public class NeuralNetworkWeightsConsumer extends Consumer {
     public NeuralNetworkWeightsConsumer(JMEVisualization jmeVisualization) {
         super(jmeVisualization);
     }
-   
+
     @Override
     public void run() {
+
         JMEWeightsHistogram3D jmeHistogram3D = new JMEWeightsHistogram3D(getJmeVisualization());
+
         while (true) {
             try {
+                /*
+                 Fetch neuralNetwork from sharedQueue
+                 If sharedQueue is empty, then consumer has to wait until the first object in sharedQueue appears
+                 */
                 NeuralNetwork neuralNetwork = (NeuralNetwork) getSharedQueue().take();
+
+                /*
+                 Draw a histogram graph, for given neuralNetwork
+                 */
                 jmeHistogram3D.setNeuralNetwork(neuralNetwork);
                 jmeHistogram3D.createGraph();
+
             } catch (InterruptedException ex) {
             }
-        }     
+            
+        }
+        
     }
+    
 }

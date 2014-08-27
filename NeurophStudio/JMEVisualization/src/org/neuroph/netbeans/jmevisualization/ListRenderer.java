@@ -3,12 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.neuroph.netbeans.jmevisualization;
 
 import java.awt.Color;
 import java.awt.Component;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -18,8 +16,8 @@ import javax.swing.ListCellRenderer;
  *
  * @author Milos Randjic
  */
-public class ListRenderer extends JPanel implements ListCellRenderer{
-    
+public class ListRenderer extends JPanel implements ListCellRenderer {
+
     private static final long serialVersionUID = -1L;
     private Color[] colors;
     private String[] strings;
@@ -37,23 +35,19 @@ public class ListRenderer extends JPanel implements ListCellRenderer{
         textPanel.add(text);
     }
 
-    public void setColors(Color[] col)
-    {
+    public void setColors(Color[] col) {
         colors = col;
     }
 
-    public void setStrings(String[] str)
-    {
+    public void setStrings(String[] str) {
         strings = str;
     }
 
-    public Color[] getColors()
-    {
+    public Color[] getColors() {
         return colors;
     }
 
-    public String[] getStrings()
-    {
+    public String[] getStrings() {
         return strings;
     }
 
@@ -61,27 +55,19 @@ public class ListRenderer extends JPanel implements ListCellRenderer{
     public Component getListCellRendererComponent(JList list, Object value,
             int index, boolean isSelected, boolean cellHasFocus) {
 
-        if (isSelected)
-        {
+        if (isSelected) {
             setBackground(list.getSelectionBackground());
-        }
-        else
-        {
+        } else {
             setBackground(Color.WHITE);
         }
 
-        if (colors.length != strings.length)
-        {
+        if (colors.length != strings.length) {
             System.out.println("colors.length does not equal strings.length");
             return this;
-        }
-        else if (colors == null)
-        {
+        } else if (colors == null) {
             System.out.println("use setColors first.");
             return this;
-        }
-        else if (strings == null)
-        {
+        } else if (strings == null) {
             System.out.println("use setStrings first.");
             return this;
         }
@@ -89,10 +75,10 @@ public class ListRenderer extends JPanel implements ListCellRenderer{
         text.setBackground(getBackground());
 
         text.setText(value.toString());
-        if (index>-1) {
+        if (index > -1) {
             text.setForeground(colors[index]);
         }
         return text;
     }
-    
+
 }

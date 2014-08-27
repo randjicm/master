@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.neuroph.netbeans.jmevisualization.charts.graphs;
 
 import org.neuroph.core.Layer;
@@ -19,21 +18,22 @@ import org.nugs.graph3d.api.Point3D;
  *
  * @author Milos Randjic
  */
-public class JMEWeightsHistogram3D extends Graph3DBuilder<Void, Point3D.Float>{
-    
+public class JMEWeightsHistogram3D extends Graph3DBuilder<Void, Point3D.Float> {
+
     private NeuralNetwork neuralNetwork;
     private JMEVisualization jmeVisualization;
-    
-    public JMEWeightsHistogram3D(NeuralNetwork neuralNetwork, JMEVisualization jmeVisualization){
+    private Histogram3DProperties properties;
+    private JMEHistogram3DFactory jmeHistogramFactory;
+
+    public JMEWeightsHistogram3D(NeuralNetwork neuralNetwork, JMEVisualization jmeVisualization) {
         super();
         dataProvider3D = new WeightsDataProvider3D(neuralNetwork);
         this.neuralNetwork = neuralNetwork;
         this.jmeVisualization = jmeVisualization;
-        
     }
 
     public JMEWeightsHistogram3D(JMEVisualization jmeVisualization) {
-        super();       
+        super();
         this.jmeVisualization = jmeVisualization;
         this.jmeVisualization.getRootNode().rotate(-1.57f, -1.57f, 0.0f);
     }
@@ -54,25 +54,51 @@ public class JMEWeightsHistogram3D extends Graph3DBuilder<Void, Point3D.Float>{
     public void setJmeVisualization(JMEVisualization jmeVisualization) {
         this.jmeVisualization = jmeVisualization;
     }
-    
+
+    public Histogram3DProperties getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Histogram3DProperties properties) {
+        this.properties = properties;
+    }
+
+    public JMEHistogram3DFactory getJmeHistogramFactory() {
+        return jmeHistogramFactory;
+    }
+
+    public void setJmeHistogramFactory(JMEHistogram3DFactory jmeHistogramFactory) {
+        this.jmeHistogramFactory = jmeHistogramFactory;
+    }
+
     @Override
     public String toString() {
         return "Weights Histogram";
     }
-    
+
+    /**
+     * Creates graph for chosen inputs
+     *
+     * @return
+     */
     @Override
     public Void createGraph() {
+
+        /*
+         Set attributes for histogram
+         */
         setAttribute1(new Attribute(0, false, "Attribute"));
         setAttribute2(new Attribute(1, false, "Attribute"));
         setAttribute3(new Attribute(2, false, "Attribute"));
-        
-        // get points to display
+
+        /*
+         Get points for chosen attributes
+         */
         Point3D.Float[] points3D = (Point3D.Float[]) dataProvider3D.getData(attribute1, attribute2, attribute3);
-        
-        // create jme scatter graph with these points
-        JMEHistogram3DFactory jmeHistogramFactory = new JMEHistogram3DFactory(jmeVisualization);
-        Histogram3DProperties prop = new Histogram3DProperties();
-        
+
+        /*
+         Find maximum number of bars per row
+         */
         int maxBarsSize = -1;
         for (int i = 0; i < neuralNetwork.getLayersCount(); i++) {
             Layer l = neuralNetwork.getLayerAt(i);
@@ -80,14 +106,23 @@ public class JMEWeightsHistogram3D extends Graph3DBuilder<Void, Point3D.Float>{
                 maxBarsSize = l.getNeuronsCount();
             }
         }
-        prop.setRadius(2f);
-        prop.setMaxBarsSize(maxBarsSize);          
-        prop.setNumberOfBarRows(neuralNetwork.getLayersCount());
-        jmeHistogramFactory.createHistogram3D(points3D, prop);
-        
+
+        /*
+         Define properties for histogram graph
+         */
+        properties = new Histogram3DProperties();
+        properties.setRadius(2f);
+        properties.setMaxBarsSize(maxBarsSize);
+        properties.setNumberOfBarRows(neuralNetwork.getLayersCount());
+
+        /*
+         Instantiate jmeHistogramFactory in order to create graph
+         */
+        jmeHistogramFactory = new JMEHistogram3DFactory(jmeVisualization);
+        jmeHistogramFactory.createHistogram3D(points3D, properties);
         jmeVisualization.getJmeCanvasContext().getCanvas().requestFocus();
+
         return null;
     }
-    
-    
+
 }
