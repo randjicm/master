@@ -16,14 +16,14 @@ public class Scatter3DProperties extends Chart3DProperties {
     private Range yRange = new Range(0, 5);
     private Range zRange = new Range(0, 5);
     private float dotSize = 1;
-    private ArrayList<ColorRGBA> dominantOutputColors;
+    private ArrayList<ColorRGBA> pointColors;
 
 
     public Scatter3DProperties() {
     }
 
-    public Scatter3DProperties(ArrayList<ColorRGBA> dominantOutputColors) {
-        this.dominantOutputColors = dominantOutputColors;
+    public Scatter3DProperties(ArrayList<ColorRGBA> pointColors) {
+        this.pointColors = pointColors;
     }
 
     public Scatter3DProperties(Range xRange, Range yRange, float dotSize) {
@@ -71,12 +71,12 @@ public class Scatter3DProperties extends Chart3DProperties {
         this.dotSize = dotSize;
     }
 
-    public ArrayList<ColorRGBA> getDominantOutputColors() {
-        return dominantOutputColors;
+    public ArrayList<ColorRGBA> getPointColors() {
+        return pointColors;
     }
 
-    public void setDominantOutputColors(ArrayList<ColorRGBA> dominantOutputColors) {
-        this.dominantOutputColors = dominantOutputColors;
+    public void setPointColors(ArrayList<ColorRGBA> dominantOutputColors) {
+        this.pointColors = dominantOutputColors;
     }
 
 }

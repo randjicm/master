@@ -7,6 +7,7 @@ import org.nugs.graph2d.api.Attribute;
  * P - Class that represents 3D point
  * 
  * @author Vedrana Gajic
+ * @param <P>
  */
 public interface DataProvider3D<P> {
     /**
