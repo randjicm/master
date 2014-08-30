@@ -24,6 +24,7 @@ public class NeuralNetworkWeightsProducer extends Producer {
     @Override
     public void run() {
         try {
+            
             /*
              Fetch neuralNetwork and dataSet 
              */

@@ -29,7 +29,7 @@ public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float> {
         super();
         dataProvider3D = new DatasetDataProvider3D(dataset);
         this.dataset = dataset;
-        this.jmeVisualization = jmeVisualization;
+        this.jmeVisualization = jmeVisualization;  
     }
 
     public JMEDatasetScatter3D(DataSet dataset, int[] inputs, ArrayList<ColorRGBA> dominantOutputColors, JMEVisualization jmeVisualization) {
@@ -113,7 +113,6 @@ public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float> {
          */
         jmeScatterFactory = new JMEScatter3DFactory(jmeVisualization);
         jmeScatterFactory.createScatter3D(points3D, properties);
-        jmeVisualization.getJmeCanvasContext().getCanvas().requestFocus();
 
         return null;
     }

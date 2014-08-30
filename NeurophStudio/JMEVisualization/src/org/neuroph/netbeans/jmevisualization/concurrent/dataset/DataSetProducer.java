@@ -28,6 +28,7 @@ public class DataSetProducer extends Producer {
     @Override
     public void run() {
         try {
+            
             /*
              Fetch neuralNetwork and dataSet 
              */
@@ -47,6 +48,7 @@ public class DataSetProducer extends Producer {
              Add appropriate output colors for a single training iteration
              */
             for (DataSetRow dataSetRow : dataSet.getRows()) {
+                
                 /*
                  Add input to the neuralNetwork
                  */

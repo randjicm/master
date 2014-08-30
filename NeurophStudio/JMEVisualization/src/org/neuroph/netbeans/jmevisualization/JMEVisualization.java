@@ -25,9 +25,9 @@ import java.util.concurrent.Callable;
  */
 public class JMEVisualization extends SimpleApplication {
 
-    private int width;
-    private int height;
     private JmeCanvasContext jmeCanvasContext;
+    private int width;
+    private int height;   
 
     @Override
     public void simpleInitApp() {
@@ -65,8 +65,8 @@ public class JMEVisualization extends SimpleApplication {
     }
 
     /*
-     Starts the application.
-     Initial paramaters are set and canvas is shown on topComponent
+     Starts the application
+     Initial paramaters are set and canvas is shown on screen
      */
     public void startApplication() {
 
@@ -86,8 +86,8 @@ public class JMEVisualization extends SimpleApplication {
     }
 
     /*
-     Attach a child from another thread. Callable interface is required for this action.
-     Callable needs to be enqueued in order to attach properly.
+     Attach a child from another thread. Callable interface is required for this action
+     Callable needs to be enqueued in order to attach properly
      */
     public void attachChild(final Geometry geometry) {
         rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
@@ -104,8 +104,8 @@ public class JMEVisualization extends SimpleApplication {
     }
 
     /*
-     Datach all children from another thread. Callable interface is required for this action.
-     Callable needs to be enqueued in order to detach properly.
+     Datach all children from another thread. Callable interface is required for this action
+     Callable needs to be enqueued in order to detach properly
      */
     public void detachAllChildren() {
         rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
@@ -122,9 +122,9 @@ public class JMEVisualization extends SimpleApplication {
     }
 
     /*
-     Attach a coordinate system with specified range and gridDensity from another thread. 
-     Callable interface is required for this action.
-     Callable needs to be enqueued in order to attach properly.
+     Attach a coordinate system with specified range and gridDensity, from another thread
+     Callable interface is required for this action
+     Callable needs to be enqueued in order to attach properly
      */
     public void attachCoordinateSystem(final int range, final int gridDensity) {
         rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
@@ -192,9 +192,9 @@ public class JMEVisualization extends SimpleApplication {
     }
 
     /*
-     Attach a histogram grid with specified number of maxBars and number of rows, from another thread. 
-     Callable interface is required for this action.
-     Callable needs to be enqueued in order to attach properly.
+     Attach a histogram grid with specified number of maxBars and number of rows, from another thread
+     Callable interface is required for this action
+     Callable needs to be enqueued in order to attach properly
      */
     public void attachHistoramGrid(final int maxBarsLength, final int numberOfBarRows) {
         rootNode.getControl(UpdateControl.class).enqueue(new Callable<Geometry>() {
