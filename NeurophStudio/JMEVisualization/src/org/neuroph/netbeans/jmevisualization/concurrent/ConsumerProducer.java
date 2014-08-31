@@ -12,13 +12,13 @@ import java.util.concurrent.LinkedBlockingQueue;
  *
  * @author Milos Randjic
  */
-public class ProducerConsumer {
+public class ConsumerProducer {
 
     private final BlockingQueue sharedQueue;
     private Producer producer;
     private Consumer consumer;
 
-    public ProducerConsumer(Producer producer, Consumer consumer) {
+    public ConsumerProducer(Producer producer, Consumer consumer) {
         sharedQueue = new LinkedBlockingQueue();
         this.producer = producer;
         this.consumer = consumer;
@@ -26,7 +26,7 @@ public class ProducerConsumer {
         this.consumer.setSharedQueue(sharedQueue);
     }
 
-    public ProducerConsumer(int queueCapacity, Producer producer, Consumer consumer) {
+    public ConsumerProducer(int queueCapacity, Producer producer, Consumer consumer) {
         sharedQueue = new LinkedBlockingQueue(queueCapacity);
         this.producer = producer;
         this.consumer = consumer;
@@ -34,11 +34,11 @@ public class ProducerConsumer {
         this.consumer.setSharedQueue(sharedQueue);
     }
 
-    public ProducerConsumer() {
+    public ConsumerProducer() {
         sharedQueue = new LinkedBlockingQueue();
     }
 
-    public ProducerConsumer(int queueCapacity) {
+    public ConsumerProducer(int queueCapacity) {
         sharedQueue = new LinkedBlockingQueue(queueCapacity);
     }
 

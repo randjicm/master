@@ -139,9 +139,9 @@ public class JMEVisualization extends SimpleApplication {
                 /*
                  Create coordinate axis arrows, for better orientation
                  */
-                Arrow xArrow = new Arrow(new Vector3f(Vector3f.UNIT_X.x * 110, Vector3f.UNIT_X.y * 110, Vector3f.UNIT_X.z * 110));
-                Arrow yArrow = new Arrow(new Vector3f(Vector3f.UNIT_Y.x * 110, Vector3f.UNIT_Y.y * 110, Vector3f.UNIT_Y.z * 110));
-                Arrow zArrow = new Arrow(new Vector3f(Vector3f.UNIT_Z.x * 110, Vector3f.UNIT_Z.y * 110, Vector3f.UNIT_Z.z * 110));
+                Arrow xArrow = new Arrow(new Vector3f(Vector3f.UNIT_X.x * 220, Vector3f.UNIT_X.y * 220, Vector3f.UNIT_X.z * 220));
+                Arrow yArrow = new Arrow(new Vector3f(Vector3f.UNIT_Y.x * 220, Vector3f.UNIT_Y.y * 220, Vector3f.UNIT_Y.z * 220));
+                Arrow zArrow = new Arrow(new Vector3f(Vector3f.UNIT_Z.x * 220, Vector3f.UNIT_Z.y * 220, Vector3f.UNIT_Z.z * 220));
 
                 /*
                  Set line width
@@ -156,6 +156,13 @@ public class JMEVisualization extends SimpleApplication {
                 Geometry xArrowG = new Geometry("xArrow", xArrow);
                 Geometry yArrowG = new Geometry("yArrow", yArrow);
                 Geometry zArrowG = new Geometry("zArrow", zArrow);
+                
+                /*
+                Move geometries to appropriate location
+                */
+                xArrowG.move(-110, 0, 0);
+                yArrowG.move(0,-110,0);
+                zArrowG.move(0, 0, -110);
 
                 /*
                  Create material and add appropriate color for each axis arrow

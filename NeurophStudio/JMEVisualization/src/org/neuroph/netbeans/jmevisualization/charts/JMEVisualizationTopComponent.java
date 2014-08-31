@@ -32,7 +32,7 @@ import org.neuroph.netbeans.jmevisualization.charts.graphs.JMEDatasetScatter3D;
 import org.neuroph.netbeans.jmevisualization.charts.graphs.JMEWeightsHistogram3D;
 import org.neuroph.netbeans.jmevisualization.concurrent.Consumer;
 import org.neuroph.netbeans.jmevisualization.concurrent.Producer;
-import org.neuroph.netbeans.jmevisualization.concurrent.ProducerConsumer;
+import org.neuroph.netbeans.jmevisualization.concurrent.ConsumerProducer;
 import org.neuroph.netbeans.jmevisualization.concurrent.dataset.DataSetConsumer;
 import org.neuroph.netbeans.jmevisualization.concurrent.dataset.DataSetProducer;
 import org.neuroph.netbeans.jmevisualization.concurrent.weights.NeuralNetworkWeightsConsumer;
@@ -92,7 +92,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     private NeuralNetAndDataSet neuralNetAndDataSet;
     private TrainingController trainingController;
 
-    private ProducerConsumer producerConsumer;
+    private ConsumerProducer consumerProducer;
     private Producer producer;
     private Consumer consumer;
 
@@ -187,7 +187,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     public void handleLearningEvent(LearningEvent le) {
         iterationCounter++;
         if (iterationCounter % 10 == 0) {
-            producerConsumer.startProducing();
+            consumerProducer.startProducing();
         }
     }
 
@@ -341,7 +341,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
      *
      * @param queueSize - size of buffer for objects needed for drawing
      */
-    public void initializeProducerConsumer(int queueSize) {
+    public void initializeConsumerProducer(int queueSize) {
 
         trainSignal = false;
         if (radioDataSet.isSelected()) {
@@ -356,11 +356,11 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         /*
          Instantiate producerConsumer and start consuming(drawing)
          */
-        producerConsumer = new ProducerConsumer(queueSize);
-        producerConsumer.setConsumer(consumer);
-        producerConsumer.setProducer(producer);
+        consumerProducer = new ConsumerProducer(queueSize);
+        consumerProducer.setConsumer(consumer);
+        consumerProducer.setProducer(producer);
 
-        producerConsumer.startConsuming();
+        consumerProducer.startConsuming();
 
     }
 
@@ -443,7 +443,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
             columnNames[i] = "Sample value " + k;
 
         }
-        dataSet.setColumnNames(columnNames);
+        //dataSet.setColumnNames(columnNames);
 
         for (int i = 1; i <= rows; i++) {
             double[] inputs = new double[inputsNumber];
