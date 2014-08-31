@@ -84,7 +84,7 @@ public final class TrainToolbarAction implements ActionListener {
        JMEVisualizationTopComponent component = JMEVisualizationTopComponent.findInstance();
        
        if(component.isTrainSignal()){
-           component.initializeProducerConsumer(1000);
+           component.initializeConsumerProducer(1000);
            
        }
        
