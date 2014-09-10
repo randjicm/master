@@ -26,7 +26,7 @@ public class DataSetConsumer extends Consumer {
             try {
 
                 /*
-                 Fetch parameters for drawing from shareddQueue
+                 Fetch parameters for drawing from sharedQueue
                  If sharedQueue is empty, then consumer has to wait until the first object in sharedQueue appears
                  */
                 DataSetVisualizationParameters parameters = (DataSetVisualizationParameters) getSharedQueue().take();
