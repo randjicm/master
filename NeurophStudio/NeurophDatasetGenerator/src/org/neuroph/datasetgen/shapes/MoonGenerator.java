@@ -38,7 +38,7 @@ public class MoonGenerator extends RingGenerator {
             }
             dataSet.addRow(new DataSetRow(new double[]{randomX, randomY}, desiredOutput));
         }
-        dataSet.setColumnNames(new String[]{"X","Y"});
+        dataSet.setColumnNames(new String[]{"X","Y","Output 1"});
         dataSet.setLabel(toString());
         return dataSet;
     }
