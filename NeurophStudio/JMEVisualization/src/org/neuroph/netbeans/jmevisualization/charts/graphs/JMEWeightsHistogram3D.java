@@ -30,12 +30,23 @@ public class JMEWeightsHistogram3D extends Graph3DBuilder<Void, Point3D.Float> {
         dataProvider3D = new WeightsDataProvider3D(neuralNetwork);
         this.neuralNetwork = neuralNetwork;
         this.jmeVisualization = jmeVisualization;
+
+        if (!this.jmeVisualization.isRotated()) {
+            this.jmeVisualization.getRootNode().rotate(-1.57f, -1.57f, 0.0f);
+            this.jmeVisualization.setRotated(true);
+        }
+
     }
 
     public JMEWeightsHistogram3D(JMEVisualization jmeVisualization) {
         super();
         this.jmeVisualization = jmeVisualization;
-        this.jmeVisualization.getRootNode().rotate(-1.57f, -1.57f, 0.0f);
+
+        if (!this.jmeVisualization.isRotated()) {
+            this.jmeVisualization.getRootNode().rotate(-1.57f, -1.57f, 0.0f);
+            this.jmeVisualization.setRotated(true);
+        }
+
     }
 
     public NeuralNetwork getNeuralNetwork() {

@@ -29,7 +29,13 @@ public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float> {
         super();
         dataProvider3D = new DatasetDataProvider3D(dataset);
         this.dataset = dataset;
-        this.jmeVisualization = jmeVisualization;  
+        this.jmeVisualization = jmeVisualization;
+        
+        if(this.jmeVisualization.isRotated()){
+            this.jmeVisualization.getRootNode().rotate(1.57f, 1.57f, 0.0f);
+            this.jmeVisualization.setRotated(false);
+        }
+        
     }
 
     public JMEDatasetScatter3D(DataSet dataset, int[] inputs, ArrayList<ColorRGBA> dominantOutputColors, JMEVisualization jmeVisualization) {
@@ -39,6 +45,12 @@ public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float> {
         this.inputs = inputs;
         this.dominantOutputColors = dominantOutputColors;
         this.jmeVisualization = jmeVisualization;
+        
+        if (this.jmeVisualization.isRotated()) {
+            this.jmeVisualization.getRootNode().rotate(1.57f, 1.57f, 0.0f);
+            this.jmeVisualization.setRotated(false);
+        }
+                
     }
 
     public int[] getInputs() {

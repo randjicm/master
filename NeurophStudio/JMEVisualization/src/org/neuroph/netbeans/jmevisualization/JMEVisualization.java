@@ -27,7 +27,8 @@ public class JMEVisualization extends SimpleApplication {
 
     private JmeCanvasContext jmeCanvasContext;
     private int width;
-    private int height;   
+    private int height; 
+    private boolean rotated;
 
     @Override
     public void simpleInitApp() {
@@ -37,6 +38,7 @@ public class JMEVisualization extends SimpleApplication {
         flyCam.setEnabled(true);
         flyCam.setMoveSpeed(200);
         flyCam.setZoomSpeed(10);
+        setRotated(false);
 
     }
 
@@ -63,13 +65,21 @@ public class JMEVisualization extends SimpleApplication {
     public void setHeight(int aHeight) {
         height = aHeight;
     }
+    
+    public boolean isRotated() {
+        return rotated;
+    }
+
+    public void setRotated(boolean rotated) {
+        this.rotated = rotated;
+    }
 
     /*
      Starts the application
      Initial paramaters are set and canvas is shown on screen
      */
     public void startApplication() {
-
+  
         AppSettings appSettings = new AppSettings(true);
         appSettings.setWidth(getWidth());
         appSettings.setHeight(getHeight());
