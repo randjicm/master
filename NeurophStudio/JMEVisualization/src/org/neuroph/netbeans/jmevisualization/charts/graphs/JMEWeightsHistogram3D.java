@@ -9,6 +9,7 @@ import org.neuroph.core.Layer;
 import org.neuroph.core.NeuralNetwork;
 import org.neuroph.netbeans.charts.graphs3d.Graph3DBuilder;
 import org.neuroph.netbeans.jmevisualization.JMEVisualization;
+import org.neuroph.netbeans.jmevisualization.charts.JMEVisualizationTopComponent;
 import org.neuroph.netbeans.jmevisualization.charts.providers.WeightsDataProvider3D;
 import org.nugs.graph2d.api.Attribute;
 import org.nugs.graph3d.api.Histogram3DProperties;
@@ -31,21 +32,11 @@ public class JMEWeightsHistogram3D extends Graph3DBuilder<Void, Point3D.Float> {
         this.neuralNetwork = neuralNetwork;
         this.jmeVisualization = jmeVisualization;
 
-        if (!this.jmeVisualization.isRotated()) {
-            this.jmeVisualization.getRootNode().rotate(-1.57f, -1.57f, 0.0f);
-            this.jmeVisualization.setRotated(true);
-        }
-
     }
 
     public JMEWeightsHistogram3D(JMEVisualization jmeVisualization) {
         super();
         this.jmeVisualization = jmeVisualization;
-
-        if (!this.jmeVisualization.isRotated()) {
-            this.jmeVisualization.getRootNode().rotate(-1.57f, -1.57f, 0.0f);
-            this.jmeVisualization.setRotated(true);
-        }
 
     }
 
@@ -125,13 +116,20 @@ public class JMEWeightsHistogram3D extends Graph3DBuilder<Void, Point3D.Float> {
         properties.setRadius(2f);
         properties.setMaxBarsSize(maxBarsSize);
         properties.setNumberOfBarRows(neuralNetwork.getLayersCount());
+        
+        if (!this.jmeVisualization.isRotated()) {
+            this.jmeVisualization.getRootNode().rotate(-1.57f, -1.57f, 0.0f);
+            this.jmeVisualization.setRotated(true);
+        }
 
         /*
          Instantiate jmeHistogramFactory in order to create graph
          */
         jmeHistogramFactory = new JMEHistogram3DFactory(jmeVisualization);
         jmeHistogramFactory.createHistogram3D(points3D, properties);
-
+        
+        JMEVisualizationTopComponent.findInstance().getVisualizationPanel().revalidate();
+        
         return null;
     }
 

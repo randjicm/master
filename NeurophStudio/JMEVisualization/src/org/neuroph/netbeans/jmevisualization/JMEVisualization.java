@@ -37,8 +37,7 @@ public class JMEVisualization extends SimpleApplication {
         flyCam.setDragToRotate(true);
         flyCam.setEnabled(true);
         flyCam.setMoveSpeed(200);
-        flyCam.setZoomSpeed(10);
-        setRotated(false);
+        flyCam.setZoomSpeed(10);   
 
     }
 
@@ -106,7 +105,7 @@ public class JMEVisualization extends SimpleApplication {
             public Geometry call() throws Exception {
 
                 rootNode.attachChild(geometry);
-                getJmeCanvasContext().getCanvas().requestFocus();
+                //getJmeCanvasContext().getCanvas().requestFocus();
                 return null;
 
             }
@@ -124,7 +123,7 @@ public class JMEVisualization extends SimpleApplication {
             public Geometry call() throws Exception {
 
                 rootNode.detachAllChildren();
-                getJmeCanvasContext().getCanvas().requestFocus();
+                //getJmeCanvasContext().getCanvas().requestFocus();
                 return null;
 
             }
@@ -201,7 +200,7 @@ public class JMEVisualization extends SimpleApplication {
                 rootNode.attachChild(zArrowG);
                 rootNode.attachChild(coordinateSystem);
 
-                getJmeCanvasContext().getCanvas().requestFocus();
+                //getJmeCanvasContext().getCanvas().requestFocus();
 
                 return null;
             }
@@ -247,7 +246,7 @@ public class JMEVisualization extends SimpleApplication {
                 rootNode.attachChild(yPlane);
                 rootNode.attachChild(zPlane);
 
-                getJmeCanvasContext().getCanvas().requestFocus();
+                //getJmeCanvasContext().getCanvas().requestFocus();
 
                 return null;
             }

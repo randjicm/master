@@ -207,6 +207,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                  Create and start JMEVisualization instance
                  */
                 jmeVisualization = new JMEVisualization();
+                jmeVisualization.setRotated(false);
                 jmeVisualization.setWidth(getVisualizationPanel().getWidth() - 15);
                 jmeVisualization.setHeight(getVisualizationPanel().getHeight() - 30);
                 jmeVisualization.startApplication();
@@ -361,9 +362,9 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         consumerProducer = new ConsumerProducer(queueSize);
         consumerProducer.setConsumer(consumer);
         consumerProducer.setProducer(producer);
-
+        
         consumerProducer.startConsuming();
-
+        
     }
 
     class DTListener implements DropTargetListener {
@@ -505,6 +506,16 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         visualizationPanel.setBackground(new java.awt.Color(255, 255, 255));
         visualizationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.visualizationPanel.border.title"))); // NOI18N
         visualizationPanel.setPreferredSize(new java.awt.Dimension(640, 480));
+        visualizationPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                visualizationPanelMouseClicked(evt);
+            }
+        });
+        visualizationPanel.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                visualizationPanelMouseMoved(evt);
+            }
+        });
 
         javax.swing.GroupLayout visualizationPanelLayout = new javax.swing.GroupLayout(visualizationPanel);
         visualizationPanel.setLayout(visualizationPanelLayout);
@@ -537,7 +548,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(radioDataSet)
                     .addComponent(radioWeights))
-                .addContainerGap(67, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -671,10 +682,9 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                         .addGap(6, 6, 6)))
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE)
-                    .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(txtSize, javax.swing.GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE)
-                        .addComponent(txtInputsSize, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(txtOutputsSize, javax.swing.GroupLayout.Alignment.LEADING)))
+                    .addComponent(txtSize, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(txtInputsSize)
+                    .addComponent(txtOutputsSize))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
@@ -704,11 +714,10 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(visualizationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 669, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -717,7 +726,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -753,6 +762,14 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         IOProvider.getDefault().getIO("Neuroph", false).getOut().println("Created dataset "+dataSet.getLabel()+"\r\n");
         
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void visualizationPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_visualizationPanelMouseClicked
+        
+    }//GEN-LAST:event_visualizationPanelMouseClicked
+
+    private void visualizationPanelMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_visualizationPanelMouseMoved
+        getVisualizationPanel().revalidate();
+    }//GEN-LAST:event_visualizationPanelMouseMoved
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;

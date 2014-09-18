@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.neuroph.core.data.DataSet;
 import org.neuroph.netbeans.charts.graphs3d.Graph3DBuilder;
 import org.neuroph.netbeans.jmevisualization.JMEVisualization;
+import org.neuroph.netbeans.jmevisualization.charts.JMEVisualizationTopComponent;
 import org.neuroph.netbeans.jmevisualization.charts.providers.DatasetDataProvider3D;
 import org.nugs.graph2d.api.Attribute;
 import org.nugs.graph3d.api.Point3D;
@@ -30,12 +31,7 @@ public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float> {
         dataProvider3D = new DatasetDataProvider3D(dataset);
         this.dataset = dataset;
         this.jmeVisualization = jmeVisualization;
-        
-        if(this.jmeVisualization.isRotated()){
-            this.jmeVisualization.getRootNode().rotate(1.57f, 1.57f, 0.0f);
-            this.jmeVisualization.setRotated(false);
-        }
-        
+
     }
 
     public JMEDatasetScatter3D(DataSet dataset, int[] inputs, ArrayList<ColorRGBA> dominantOutputColors, JMEVisualization jmeVisualization) {
@@ -45,12 +41,7 @@ public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float> {
         this.inputs = inputs;
         this.dominantOutputColors = dominantOutputColors;
         this.jmeVisualization = jmeVisualization;
-        
-        if (this.jmeVisualization.isRotated()) {
-            this.jmeVisualization.getRootNode().rotate(1.57f, 1.57f, 0.0f);
-            this.jmeVisualization.setRotated(false);
-        }
-                
+
     }
 
     public int[] getInputs() {
@@ -120,12 +111,19 @@ public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float> {
         properties.setzAxeLabel(attribute3.getLabel());
         properties.setPointColors(dominantOutputColors);
 
+        if (this.jmeVisualization.isRotated()) {
+            this.jmeVisualization.getRootNode().rotate(1.57f, 1.57f, 0.0f);
+            this.jmeVisualization.setRotated(false);
+        }
+
         /*
          Instantiate jmeScatterFactory in order to create graph
          */
         jmeScatterFactory = new JMEScatter3DFactory(jmeVisualization);
         jmeScatterFactory.createScatter3D(points3D, properties);
 
+        JMEVisualizationTopComponent.findInstance().getVisualizationPanel().revalidate();
+        
         return null;
     }
 
