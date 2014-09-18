@@ -79,17 +79,17 @@ public final class TrainToolbarAction implements ActionListener {
         }
     }
     
-    public void JMEVisualizationModuleCheck() {
-        
-       JMEVisualizationTopComponent component = JMEVisualizationTopComponent.findInstance();
-       
-       if(component.isTrainSignal()){
-           component.initializeConsumerProducer(1000);
-           
-       }
-       
-        
-    }
+//    public void JMEVisualizationModuleCheck() {
+//        
+//       JMEVisualizationTopComponent component = JMEVisualizationTopComponent.findInstance();
+//       
+//       if(component.isTrainSignal()){
+//           component.initializeConsumerProducer(1000);
+//           
+//       }
+//       
+//        
+//    }
 
     public void train() {
         if (neuralNetAndDataSet.getDataSet() != null) {
@@ -104,7 +104,7 @@ public final class TrainToolbarAction implements ActionListener {
             } else if (neuralNetClass.equals(MultiLayerPerceptron.class)) {
                 showMLPTrainingDialog();
                 ClassificationSampleModuleCheck();
-                JMEVisualizationModuleCheck();
+                //JMEVisualizationModuleCheck();
             } else if (neuralNetClass.equals(SupervisedHebbianNetwork.class)) {
                 showHebbianTrainingDialog();
             } else if (neuralNetClass.equals(NoPropNet.class)) {
