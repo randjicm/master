@@ -111,18 +111,13 @@ public class JMEDatasetScatter3D extends Graph3DBuilder<Void, Point3D.Float> {
         properties.setzAxeLabel(attribute3.getLabel());
         properties.setPointColors(dominantOutputColors);
 
-        if (this.jmeVisualization.isRotated()) {
-            this.jmeVisualization.getRootNode().rotate(1.57f, 1.57f, 0.0f);
-            this.jmeVisualization.setRotated(false);
-        }
-
         /*
          Instantiate jmeScatterFactory in order to create graph
          */
         jmeScatterFactory = new JMEScatter3DFactory(jmeVisualization);
         jmeScatterFactory.createScatter3D(points3D, properties);
 
-        JMEVisualizationTopComponent.findInstance().getVisualizationPanel().revalidate();
+        //JMEVisualizationTopComponent.findInstance().getVisualizationPanel().revalidate();
         
         return null;
     }

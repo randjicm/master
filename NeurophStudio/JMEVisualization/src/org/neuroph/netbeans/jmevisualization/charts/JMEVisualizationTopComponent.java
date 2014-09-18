@@ -407,6 +407,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 if (dataSet != null) {
                     trainingSet = dataSet;
 
+                    neuralNetworkAndDataSetInformationCheck(neuralNetwork, trainingSet);
                     if (radioDataSet.isSelected()) {
                         IOSettingsDialog dataSetSettings = IOSettingsDialog.getInstance();
                         dataSetSettings.initializeInformation(trainingSet, jmeVisualization);
@@ -416,7 +417,8 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 }
 
                 if (nnet != null) {
-                    neuralNetwork = nnet;//new MultiLayerPerceptron(inputs, 4, outputs);//nnet;
+                    neuralNetwork = nnet;
+                    neuralNetworkAndDataSetInformationCheck(neuralNetwork, trainingSet);
                 }
 
                 if (neuralNetwork != null && trainingSet != null) {
@@ -424,6 +426,8 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                     removeContent();
                     trainingPreprocessing();
                     addContent();
+                    neuralNetworkAndDataSetInformationCheck(neuralNetwork, trainingSet);
+                    initializeConsumerProducer(1000);
                 }
 
                 e.dropComplete(true);
@@ -455,6 +459,44 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         }
         return dataSet;
     }
+    
+    /*
+     * This method shows the information, eg. current name of dataset and neural network that are used for training
+     */
+    public void neuralNetworkAndDataSetInformationCheck(NeuralNetwork neuralNetvork, DataSet dataSet) {
+
+        
+        if (dataSet != null) {
+            if (dataSet.getLabel() != null) {
+                labDataset.setText(dataSet.getLabel());
+                
+            } else {
+                labDataset.setText("Not selected");
+            }
+        } else {
+            labDataset.setText("Not selected");
+        }
+        if (neuralNetvork != null) {
+            if (neuralNetvork.getLabel() != null) {
+                labNetwork.setText(neuralNetvork.getLabel());
+            } else {
+                labNetwork.setText("Not selected");           
+            }
+        } else {
+            labNetwork.setText("Not selected");
+        }
+    }
+    
+//    int inputs = Integer.parseInt(txtInputsSize.getText());
+//        int outputs = Integer.parseInt(txtOutputsSize.getText());
+//        int dataSetSize = Integer.parseInt(txtSize.getText());
+//        
+//        DataSet dataSet = generateRandomDataSet(inputs, outputs, dataSetSize);       
+//        dataSet.setLabel("Test dataset");
+//        
+//        NeurophProjectFilesFactory.getDefault().createTrainingSetFile(dataSet);
+//             
+//        IOProvider.getDefault().getIO("Neuroph", false).getOut().println("Created dataset "+dataSet.getLabel()+"\r\n");
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -489,6 +531,11 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         jLabel3 = new javax.swing.JLabel();
         txtSize = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        labNetwork = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        labDataset = new javax.swing.JLabel();
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -504,7 +551,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
         visualizationPanel.setBackground(new java.awt.Color(255, 255, 255));
-        visualizationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.visualizationPanel.border.title"))); // NOI18N
+        visualizationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         visualizationPanel.setPreferredSize(new java.awt.Dimension(640, 480));
         visualizationPanel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -521,11 +568,11 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
         visualizationPanel.setLayout(visualizationPanelLayout);
         visualizationPanelLayout.setHorizontalGroup(
             visualizationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 665, Short.MAX_VALUE)
+            .addGap(0, 906, Short.MAX_VALUE)
         );
         visualizationPanelLayout.setVerticalGroup(
             visualizationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 526, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
 
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
@@ -545,15 +592,17 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(radioDataSet)
-                    .addComponent(radioWeights))
+                .addComponent(radioDataSet)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(radioWeights)
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(17, 17, 17)
+                .addContainerGap()
                 .addComponent(radioDataSet)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(radioWeights)
@@ -685,7 +734,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                     .addComponent(txtSize, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtInputsSize)
                     .addComponent(txtOutputsSize))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(40, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -707,29 +756,77 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
                 .addContainerGap())
         );
 
+        jPanel6.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.jPanel6.border.title"))); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel8, org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.jLabel8.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(labNetwork, org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.labNetwork.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel9, org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.jLabel9.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(labDataset, org.openide.util.NbBundle.getMessage(JMEVisualizationTopComponent.class, "JMEVisualizationTopComponent.labDataset.text")); // NOI18N
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel9)
+                    .addComponent(jLabel8))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(labNetwork, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
+                    .addComponent(labDataset, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(labNetwork))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel9)
+                    .addComponent(labDataset))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(visualizationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 669, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(visualizationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 910, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(visualizationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 531, Short.MAX_VALUE)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(visualizationPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 598, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(20, 20, 20))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -749,18 +846,18 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     }//GEN-LAST:event_txtInputsSizeActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        
         int inputs = Integer.parseInt(txtInputsSize.getText());
         int outputs = Integer.parseInt(txtOutputsSize.getText());
         int dataSetSize = Integer.parseInt(txtSize.getText());
-        
-        DataSet dataSet = generateRandomDataSet(inputs, outputs, dataSetSize);       
+
+        DataSet dataSet = generateRandomDataSet(inputs, outputs, dataSetSize);
         dataSet.setLabel("Test dataset");
-        
+
         NeurophProjectFilesFactory.getDefault().createTrainingSetFile(dataSet);
-             
-        IOProvider.getDefault().getIO("Neuroph", false).getOut().println("Created dataset "+dataSet.getLabel()+"\r\n");
-        
+
+        IOProvider.getDefault().getIO("Neuroph", false).getOut().println("Created dataset " + dataSet.getLabel() + "\r\n");
+
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void visualizationPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_visualizationPanelMouseClicked
@@ -768,7 +865,7 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     }//GEN-LAST:event_visualizationPanelMouseClicked
 
     private void visualizationPanelMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_visualizationPanelMouseMoved
-        getVisualizationPanel().revalidate();
+       
     }//GEN-LAST:event_visualizationPanelMouseMoved
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -781,12 +878,17 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel labDataset;
+    private javax.swing.JLabel labNetwork;
     private javax.swing.JLabel labX;
     private javax.swing.JLabel labY;
     private javax.swing.JLabel labZ;
@@ -799,43 +901,4 @@ public final class JMEVisualizationTopComponent extends TopComponent implements 
     private javax.swing.JPanel visualizationPanel;
     // End of variables declaration//GEN-END:variables
 
-//    public void drawWeightsHistogram(NeuralNetwork neuralNetwork) {
-//      JMEWeightsHistogram3D jmeWeightsHistogram3D = new JMEWeightsHistogram3D(neuralNetwork, jmeVisualization);           
-//      jmeWeightsHistogram3D.createGraph();
-//    }
-//    public DataSet createSphereDataSet() {
-//
-//        DataSet d = new DataSet(3, 2);
-//        Random r = new Random();
-//        for (int i = 1; i <= 5000; i++) {
-//
-//            double x = r.nextGaussian();
-//            double y = r.nextGaussian();
-//            double z = r.nextGaussian();
-//            
-//            double c1 = (getCategoryMembership(x, y, z, 0, 0, 0, 1, 1, 1));
-//            if ( c1>= 1) {
-//                d.addRow(new double[]{x, y, z}, new double[]{1.0, 0.0});
-//            } else {
-//                d.addRow(new double[]{x, y, z}, new double[]{0.0, 1.0});
-//            }
-//
-//        }
-//
-//        return d;
-//    }    
-//    public void drawSampleHistogram() {
-//      JMEDatasetHistogram3D jmeDataSetHistogram = new JMEDatasetHistogram3D(createSphereDataSet(), jmeVisualization);           
-//      jmeDataSetHistogram.createGraph();
-//    }
-//    
-//    public void drawDataSet(DataSet dataSet) {
-//        IOSettingsDialog d = IOSettingsDialog.getInstance();
-//        JMEDatasetScatter3D jmeDataSetScatter = new JMEDatasetScatter3D(dataSet, d.getStoredInputs(), d.getOutputColors(), jmeVisualization);
-//        jmeDataSetScatter.createGraph();
-//    }
-//    
-//    private double getCategoryMembership(double randomX, double randomY, double randomZ, double x, double y, double z, double a, double b, double c) {
-//        return (randomX - x) * (randomX - x) / (a * a) + (randomY - y) * (randomY - y) / (b * b) + (randomZ - z) * (randomZ - z) / (c * c);
-//    } 
 }
